@@ -47,6 +47,269 @@
 - ✅ New Architecture dla lepszej wydajności
 
 ---
+## Segment 1.1: Czym jest React Native? (15 minut)
+
+**SCRIPT:**
+
+> „Dzień dobry! Dziś zaczynamy naszą 10-godzinną podróż po React Native – frameworku, który pozwoli nam pisać aplikacje mobilne w JavaScripcie. Zamiast uczyć się Kotlina na Androida i Swifta na iOS-ie, my będziemy pisać JEDEN kod w JavaScripcie, a React Native „przetłumaczy" go na natywne komponenty dla obu platform."
+
+**Wyjaśnienie koncepcji:**
+
+React Native to biblioteka stworzona przez Facebook (Meta) pozwalająca budować natywne aplikacje mobilne dla Androida i iOS-a za pomocą JavaScriptu. Pod spodem React Native używa **React Bridgea** – mostu komunikacyjnego między kodem JavaScript a kodem natywnym (Java, Kotlin na Androidzie; Swift, Objective-C na iOS-ie).
+
+**Diagram do narysowania na tablicy/ekranie:**
+
+```
+┌─────────────────────────────────┐
+│   JavaScript (React Native)      │
+├─────────────────────────────────┤
+│      React Native Bridge         │ ← Łączy JS z native'em
+├─────────────────────────────────┤
+│  Android (Java/Kotlin)  iOS      │
+│                          (Swift)  │
+└─────────────────────────────────┘
+```
+
+**Kluczowe punkty:**
+- React Native NIE to WebView (jak Cordova) – to prawdziwe komponenty natywne
+- Jeden kod JavaScript = dwie platformy (Android + iOS)
+- Hot Reload – zmian widać od razu bez rebuild'u
+- Dostęp do hardware'u urządzenia (kamera, GPS, itd.)
+
+---
+
+## Segment 1.2: Instalacja Node.js i pnpm (25 minut)
+
+**SCRIPT:**
+
+> „Zanim zaczniemy pisać, musimy zainstalować narzędzia. Będziemy używać pnpm zamiast tradycyjnego npm. pnpm jest szybszy, oszczędza miejsce na dysku i ma lepsze zarządzanie zależnościami."
+
+**Kroki instalacji (dla Windows):**
+
+1. **Pobierz Node.js** (wersja LTS):
+   - Przejdź na nodejs.org
+   - Pobierz wersję oznaczoną LTS (Long-Term Support)
+   - Zainstaluj ze wszystkimi domyślnymi opcjami
+
+2. **Sprawdź instalację Node.js:**
+   ```bash
+   node --version
+   npm --version
+   ```
+
+3. **Zainstaluj pnpm globalnie:**
+   ```bash
+   npm install -g pnpm
+   ```
+
+4. **Sprawdź instalację pnpm:**
+   ```bash
+   pnpm --version
+   ```
+
+**Wyjaśnienie:** Node.js to środowisko JavaScript na serwerze (i lokalnie na naszych komputerach). npm to domyślny menedżer pakietów. pnpm to zaawansowana alternatywa.
+
+**Czemu pnpm?**
+- Szybszy niż npm
+- Mniej miejsca na dysku (cache globalny + hardlinki)
+- Lepszy lock file (`pnpm-lock.yaml`)
+- Wsparcie dla monorepo
+
+---
+
+## Segment 1.3: Podstawowa Architektura React Native (10 minut)
+
+**SCRIPT:**
+
+> „React Native ma strukturę podobną do Reacta web'owego, ale zamiast HTML komponentów (div, button), używamy komponentów mobilnych (View, Text, Button, TextInput). To są wrappery wokół natywnych komponentów."
+
+**Podstawowe komponenty:**
+
+```
+React Web              React Native
+─────────────          ────────────────
+<div>                  <View>
+<span>, <p>            <Text>
+<input>                <TextInput>
+<button>               <Button> / <Pressable>
+<img>                  <Image>
+<ul>, <li>             <FlatList>, <ScrollView>
+```
+
+**Struktura komponentu React Native (bez TypeScript, czysta funkcja):**
+
+```javascript
+import React, { useState } from 'react';
+import { View, Text, Button } from 'react-native';
+
+function MyComponent() {
+  const [count, setCount] = useState(0);
+
+  return (
+    <View style={{ padding: 20 }}>
+      <Text style={{ fontSize: 18, marginBottom: 10 }}>
+        Licznik: {count}
+      </Text>
+      <Button 
+        title="Kliknij mnie" 
+        onPress={() => setCount(count + 1)} 
+      />
+    </View>
+  );
+}
+
+export default MyComponent;
+```
+
+**Wyjaśnienie kodu:**
+- `View` = kontener (jak `<div>`)
+- `Text` = tekst (wie się nie go do samodzielnego wrappowania)
+- `useState` = hook do zarządzania stanem
+- `onPress` = zdarzenie kliknięcia (zamiast `onClick`)
+- `style` = obiekty JS (zamiast CSS)
+
+---
+
+# GODZINA 2: Tworzenie Projektu bez Expo (CLI Development Build)
+
+## Segment 2.1: Inicjalizacja Projektu (20 minut)
+
+**SCRIPT:**
+
+> „Teraz stworzymy nowy projekt React Native BEZPOŚREDNIO za pomocą React Native CLI, bez Expo. Expo jest fajne na początku, ale my chcemy pełnej kontroli – będziemy móc tworzyć natywne moduły, customować konfigurację, wszystko."
+
+**Kroki:**
+
+1. **Otwórz terminal/PowerShell i przejdź do folderu, gdzie chcesz projekt:**
+   ```bash
+   cd C:\projekty
+   ```
+
+2. **Utwórz projekt za pomocą pnpm (zamiast npx):**
+   ```bash
+   pnpm create react-native-app OrderManagementApp
+   ```
+   
+   **Wyjaśnienie:** `create-react-native-app` to narzędzie które automatycznie stawiamy projekt z konfiguracją. `OrderManagementApp` to nazwa projektu.
+
+3. **Czekaj na instalację** (~2-5 minut, pnpm będzie pobierać zależności)
+
+4. **Przejdź do folderu projektu:**
+   ```bash
+   cd OrderManagementApp
+   ```
+
+5. **Sprawdzenie struktury:**
+   ```bash
+   dir
+   ```
+   
+   Powinieneś zobaczyć:
+   ```
+   android/              ← Kod Android (Java/Kotlin)
+   ios/                  ← Kod iOS (Swift)
+   node_modules/         ← Zainstalowane pakiety
+   App.js                ← Główny komponent
+   app.json              ← Konfiguracja aplikacji
+   package.json          ← Zależności
+   babel.config.js       ← Konfiguracja Babel (transpiler)
+   ```
+
+---
+
+## Segment 2.2: Uruchomienie na Emulatorze Android (25 minut)
+
+**SCRIPT:**
+
+> „Teraz będziemy chcieli zobaczyć naszą aplikację na emulatorze Android. Na początek potrzebujemy emulator. Możemy go zainstalować za pomocą Android Studio."
+
+**Wymagania:**
+- Android Studio zainstalowany (https://developer.android.com/studio)
+- Emulator Android uruchomiony lub fizyczne urządzenie podłączone
+
+**Uruchomienie aplikacji:**
+
+1. **Upewnij się, że emulator jest uruchomiony** (lub urządzenie podłączone)
+
+2. **Uruchom aplikację:**
+   ```bash
+   pnpm run android
+   ```
+
+3. **Co się będzie działo:**
+   - React Native CLI skompiluje kod Java/Kotlin
+   - Zbuduje APK
+   - Zainstaluje go na emulatorze
+   - Metro Bundler uruchomi się (serwer bundlujący JS)
+   - Zobaczysz aplikację na ekranie
+
+4. **Jeśli zobaczysz ekran powitalny** – gratulacje! Projekt działa!
+
+**Jeśli pojawią się błędy:**
+- Sprawdź czy JAVA_HOME jest ustawiony: `echo %JAVA_HOME%` (Windows)
+- Sprawdź czy Android SDK jest zainstalowany
+- Uruchom ponownie emulator
+
+**Wyjaśnienie Development Build:**
+
+Development build to wersja aplikacji z hot reloading, debug narzędziami, i łatwościami do developmentu. To NIE jest production build (nie byłby na App Store). Benefit: zmienisz kod w JS, a aplikacja przeładuje się sama.
+
+---
+
+## Segment 2.3: Struktura Projektu i Konfiguracja pnpm (15 minut)
+
+**SCRIPT:**
+
+> „Zanim pójdziemy dalej, musimy zrozumieć strukturę projektu i ustawić pnpm dla React Native."
+
+**Ważne ustawienie dla React Native + pnpm:**
+
+Otwórz plik `.npmrc` w głównym folderze projektu (jeśli nie istnieje – utwórz go):
+
+```ini
+# .npmrc
+node-linker=hoisted
+```
+
+**Wyjaśnienie:** React Native potrzebuje „spłaszczonej" struktury `node_modules` (wszystkie pakiety w jednym poziomie). pnpm domyślnie tworzy strukturę „symlinków" które są lepsze, ale RN nie zawsze je lubi. `node-linker=hoisted` mówi pnpm aby robił to jak npm.
+
+**Struktura folderów którą będziemy budować:**
+
+```
+OrderManagementApp/
+├── android/              (Nie będziemy tutaj edytować)
+├── ios/                  (Nie będziemy tutaj edytować)
+├── src/
+│   ├── api/             ← Komunikacja z .NET API
+│   │   └── apiService.js
+│   ├── screens/         ← Ekrany aplikacji
+│   │   ├── UnitOfMeasurementScreen.js
+│   │   ├── CategoryScreen.js
+│   │   ├── ClientScreen.js
+│   │   ├── WorkerScreen.js
+│   │   ├── ItemScreen.js
+│   │   ├── OrderScreen.js
+│   │   └── OrderItemScreen.js
+│   ├── components/      ← Reużywalne komponenty
+│   │   ├── FormInput.js
+│   │   ├── ListItem.js
+│   │   └── ActionButtons.js
+│   ├── hooks/           ← Custom hooki
+│   │   └── useFetch.js
+│   ├── utils/           ← Funkcje pomocnicze
+│   │   └── validation.js
+│   └── constants/       ← Stałe
+│       └── apiEndpoints.js
+├── App.js
+├── app.json
+├── package.json
+└── .npmrc
+```
+
+**Punkt nauczania:**
+Dzielenie kodu na moduły jest KLUCZOWE w większych projektach. Każdy folder ma jedną odpowiedzialność. To ułatwia testowanie, debugowanie, i maintenance.
+
+---
 
 ## CZĘŚĆ 2: Architektura React Native
 
