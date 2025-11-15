@@ -142,11 +142,30 @@ return order.IdOrder;
 
 ## CZĘŚĆ 4: Formularz zamówienia w React Native (35 minut)
 
+### 4.1. Instalacja DateTimePicker
+
+```bash
+pnpm add @react-native-community/datetimepicker
+```
+
+### 4.2. Implementacja formularza
+
 - PickerField dla klienta, pracownika
 - Lista produktów z możliwością dodania każdej pozycji (Picker + ilość)
 - Data dostawy: 
 ```tsx
-<DateTimePicker ... />
+import DateTimePicker from '@react-native-community/datetimepicker';
+import { useState } from 'react';
+
+const [date, setDate] = useState(new Date());
+
+<DateTimePicker
+  value={date}
+  mode="date"
+  onChange={(event, selectedDate) => {
+    if (selectedDate) setDate(selectedDate);
+  }}
+/>
 ```
 - Walidacja: minimalna ilość > 0, wymagane klient/pozycje
 - Wyświetlanie zamówienia z listą pozycji

@@ -147,7 +147,7 @@ launchCamera(...);
 **Dlaczego React Native w tym kursie?**
 - ✅ JavaScript (znany większości frontend devów)
 - ✅ React ecosystem (React dev mają naturalnie)
-- ✅ Ogromna komunita
+- ✅ Ogromna społeczność
 - ✅ Dużo bibliotek i narzędzi
 - ✅ Łatwo znaleźć specjalistów
 
@@ -225,7 +225,7 @@ React Native 0.80.x         ← Stable
 React Native 0.79.x         ← Old
 ```
 
-**Strateg wersjonowania:**
+**Strategia wersjonowania:**
 - Nowa minor wersja ~co 2 miesiące
 - Patch releases co tydzień
 - Long-Term Support (LTS) wersje
@@ -354,13 +354,13 @@ pnpm install
 pnpm react-native run-android
 ```
 
-**Улучшения:**
+**Ulepszenia:**
 - ✅ TypeScript built-in
 - ✅ Szybki setup (5 minut)
 - ✅ Auto-detect Android location
 - ✅ Hermes by default
 - ✅ Hot reload lightning fast
-- ✅ Excelent IDE support
+- ✅ Excellent IDE support
 
 ---
 
@@ -383,8 +383,7 @@ const [count, setCount] = useState(0);
 
 **3. Native Modules**
 ```tsx
-import { NativeModules } from 'react-native';
-const { Vibration } = NativeModules;
+import { Vibration } from 'react-native';
 Vibration.vibrate(100);
 ```
 
@@ -447,8 +446,8 @@ Wdrażanie na produkcję! 🚀
 - ✅ Dojrzała technologia (10 lat)
 - ✅ Wyprodukowana przez Meta (duży backing)
 - ✅ TypeScript z pudełka
-- ✅ Ogromna komunita
-- ✅ Wciąż się evolwuje (New Architecture)
+- ✅ Ogromna społeczność
+- ✅ Wciąż się ewoluuje (New Architecture)
 - ✅ Przyszłość mobilnego developmentu
 
 **Dlaczego się uczyć RN?**

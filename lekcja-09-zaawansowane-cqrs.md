@@ -11,7 +11,7 @@ Po ukończeniu tej lekcji będziesz potrafić:
 - ✅ Zaimplementować paginację i filtrowanie Queries
 - ✅ Użyć custom pipeline behaviors do logowania
 - ✅ Rozszerzyć CQRS o audyt i performance logging
-- ✅ Testować wydajność handli 
+- ✅ Testować wydajność handlerów 
 
 ---
 

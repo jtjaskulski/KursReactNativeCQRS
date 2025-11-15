@@ -132,7 +132,7 @@ npx tsc --init
     /* System modułów */
     "module": "commonjs",
     
-    /*Ścisłe sprawdzanie typów */
+    /* Ścisłe sprawdzanie typów */
     "strict": true,
     
     /* Gdzie zapisać skompilowane pliki */

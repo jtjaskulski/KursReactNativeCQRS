@@ -52,12 +52,19 @@ public virtual ICollection<Item> Items { get; set; } = new List<Item>();
 
 ## CZĘŚĆ 2: PickerField w React Native (30 minut)
 
-### 2.1. Komponent PickerField
+### 2.1. Instalacja Picker
+
+```bash
+pnpm add @react-native-picker/picker
+```
+
+### 2.2. Komponent PickerField
 
 **src/components/PickerField.tsx:**
 ```tsx
 import React from 'react';
-import { View, Text, Picker, StyleSheet } from 'react-native';
+import { View, Text, StyleSheet } from 'react-native';
+import { Picker } from '@react-native-picker/picker';
 
 interface PickerFieldProps<T> {
   label: string;
@@ -104,7 +111,7 @@ const styles = StyleSheet.create({
 });
 ```
 
-### 2.2. Implementacja w formularzu produktu
+### 2.3. Implementacja w formularzu produktu
 
 ```tsx
 <PickerField

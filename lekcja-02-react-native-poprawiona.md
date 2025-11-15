@@ -437,7 +437,7 @@ const styles = StyleSheet.create({
   },
   buttons: {
     flexDirection: 'row',
-    gap: 10,
+    columnGap: 10,  // gap wspierany od RN 0.71+, użyj columnGap lub marginRight
     justifyContent: 'center',
   },
 });

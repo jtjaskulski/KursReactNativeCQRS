@@ -692,7 +692,7 @@ const styles = StyleSheet.create({
   },
   itemActions: {
     flexDirection: 'row',
-    gap: 8,
+    columnGap: 8,  // gap wspierany od RN 0.71+
   },
   editButton: {
     backgroundColor: '#4CAF50',
@@ -966,7 +966,10 @@ const styles = StyleSheet.create({
   itemContent: { flex: 1 },
   itemTitle: { fontSize: 16, fontWeight: 'bold' },
   itemSubtitle: { fontSize: 14, color: '#666', marginTop: 4 },
-  itemActions: { flexDirection: 'row', gap: 8 },
+  itemActions: { 
+    flexDirection: 'row',
+    columnGap: 8,  // gap jest wspierany od RN 0.71+
+  },
   editButton: { backgroundColor: '#4CAF50', padding: 8, borderRadius: 6 },
   deleteButton: { backgroundColor: '#F44336', padding: 8, borderRadius: 6 },
   buttonText: { color: '#fff' },

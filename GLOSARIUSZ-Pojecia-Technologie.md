@@ -267,7 +267,7 @@ Format wymiany danych między API a klientem.
 ## K
 
 ### Kotlin
-Językiem dla Android (zamiennik Java). W React Native abstrahowany - piszemy TypeScript.
+Język dla Android (zamiennik Java). W React Native abstrahowany - piszemy TypeScript.
 
 ### keyExtractor (FlatList)
 Funkcja zwracająca unikalny klucz dla każdego elementu listy. Ważne dla performance.

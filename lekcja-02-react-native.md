@@ -10,7 +10,7 @@
 
 Po ukończeniu tej lekcji będziesz potrafić:
 - ✅ Zainstalować React Native CLI z TypeScript
-- ✅ Skonfigurować środowisko (pnpm, emulatdor)
+- ✅ Skonfigurować środowisko (pnpm, emulator)
 - ✅ Tworzyć komponenty funkcyjne z TypeScript
 - ✅ Używać Props i State z typowaniem
 - ✅ Stylować komponenty (StyleSheet, Flexbox)
@@ -291,7 +291,7 @@ const styles = StyleSheet.create({
   },
   buttons: {
     flexDirection: 'row',
-    gap: 10,
+    columnGap: 10,  // gap wspierany od RN 0.71+, użyj columnGap lub marginRight
   },
 });
 

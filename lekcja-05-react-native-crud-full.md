@@ -552,7 +552,12 @@ import {
 import { useItems } from '../context/ItemsContext';
 import type { Item } from '../types/models';
 
-function ItemsScreen({ navigation }: any) {
+import { NativeStackScreenProps } from '@react-navigation/native-stack';
+import { RootStackParamList } from '../navigation/types';
+
+type Props = NativeStackScreenProps<RootStackParamList, 'Items'>;
+
+function ItemsScreen({ navigation }: Props) {
   const { items, loading, error, deleteItem } = useItems();
 
   const handleDelete = (item: Item) => {
@@ -740,7 +745,7 @@ const styles = StyleSheet.create({
   },
   itemActions: {
     flexDirection: 'row',
-    gap: 8,
+    columnGap: 8,  // gap wspierany od RN 0.71+
   },
   editButton: {
     backgroundColor: '#4CAF50',
@@ -790,7 +795,12 @@ import { useItems } from '../context/ItemsContext';
 import apiService from '../api/apiService';
 import type { Category, UnitOfMeasurement } from '../types/models';
 
-function CreateItemScreen({ navigation }: any) {
+import { NativeStackScreenProps } from '@react-navigation/native-stack';
+import { RootStackParamList } from '../navigation/types';
+
+type Props = NativeStackScreenProps<RootStackParamList, 'CreateItem'>;
+
+function CreateItemScreen({ navigation }: Props) {
   const { createItem } = useItems();
 
   // Form state
@@ -1014,12 +1024,12 @@ const styles = StyleSheet.create({
   pickerContainer: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: 8,
+    columnGap: 8,  // gap wspierany od RN 0.71+
     marginBottom: 8,
   },
   buttons: {
     flexDirection: 'row',
-    gap: 10,
+    columnGap: 10,  // gap wspierany od RN 0.71+
     marginTop: 20,
     marginBottom: 30,
   },
