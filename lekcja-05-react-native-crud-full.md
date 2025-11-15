@@ -519,11 +519,19 @@ export function ItemsProvider({ children }: { children: ReactNode }) {
       const result = await apiService.createItem(data);
       
       // Dodaj nowy item do listy (lokalnie bez refresh)
+      // Mapujemy pola z CreateItemRequest na pełny Item, ustawiając
+      // wartości domyślne (null/empty) tam gdzie request ma pola opcjonalne.
       const newItem: Item = {
         idItem: result.id,
-        ...data,
+        name: data.name,
+        description: data.description ?? null,
+        idCategory: data.idCategory,
         categoryName: '',
+        price: data.price ?? null,
+        quantity: data.quantity ?? null,
+        idUnitOfMeasurement: data.idUnitOfMeasurement ?? null,
         unitName: '',
+        code: data.code ?? null,
         isActive: true,
       };
       setItems(prev => [...prev, newItem]);
