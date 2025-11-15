@@ -1,4 +1,4 @@
-# Lekcja 5: React Native - Integracja z API CQRS (3 godziny) - ROZSZERZONA
+# Lekcja 5: React Native - Integracja z API CQRS - ROZSZERZONA
 
 **Moduł:** React Native + .NET Integration  
 **Poziom:** Średnio-zaawansowany
@@ -17,7 +17,7 @@ Po ukończeniu tej lekcji będziesz potrafić:
 
 ---
 
-## CZĘŚĆ 1: Konfiguracja IP i Setup (20 minut)
+## CZĘŚĆ 1: Konfiguracja IP i Setup
 
 ### 1.1. Problem z localhost w React Native
 
@@ -75,7 +75,113 @@ const getBaseUrl = (): string => {
 export const API_BASE_URL = getBaseUrl();
 ```
 
-### 1.4. adb reverse (Alternatywa dla Android)
+### 1.4. Konfiguracja dla Docker (WAŻNE!)
+
+**Problem:** Gdy API działa w Dockerze, `10.0.2.2` i `localhost` NIE DZIAŁAJĄ dla Android Emulator!
+
+**Rozwiązanie:** Użyj lokalnego IP swojego komputera.
+
+#### Krok 1: Znajdź swoje IP
+
+**Windows PowerShell:**
+```powershell
+ipconfig
+```
+Szukaj `IPv4 Address` dla `Ethernet adapter` lub `Wi-Fi` (np. `192.168.1.100`)
+
+**macOS/Linux:**
+```bash
+ifconfig | grep "inet "
+# lub
+ip addr show
+```
+
+#### Krok 2: Zaktualizuj config.ts
+
+**src/api/config.ts:**
+```typescript
+import { Platform } from 'react-native';
+
+const getBaseUrl = (): string => {
+  if (__DEV__) {
+    // DOCKER: Użyj lokalnego IP komputera (nie localhost!)
+    if (Platform.OS === 'android') {
+      return 'http://192.168.1.100:5000/api';  // TWOJE IP!
+    } else if (Platform.OS === 'ios') {
+      return 'http://192.168.1.100:5000/api';  // TWOJE IP!
+    }
+  }
+  
+  // Production
+  return 'https://your-production-api.com/api';
+};
+
+export const API_BASE_URL = getBaseUrl();
+
+// Debug
+console.log('API_BASE_URL:', API_BASE_URL);
+console.log('Platform:', Platform.OS);
+```
+
+#### Krok 3: Sprawdź CORS w backendzie
+
+Backend musi zezwalać na połączenia z aplikacji mobilnej.
+
+**Program.cs:**
+```csharp
+// CORS - dla development zezwalaj na wszystkie połączenia
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowAll",
+        policy => policy
+            .AllowAnyOrigin()
+            .AllowAnyMethod()
+            .AllowAnyHeader());
+});
+
+// ...
+
+app.UseCors("AllowAll");
+```
+
+#### Krok 4: Test połączenia
+
+1. **Sprawdź czy Docker działa:**
+   ```bash
+   docker ps
+   ```
+
+2. **Test API z przeglądarki:**
+   ```
+   http://localhost:5000/swagger
+   http://192.168.1.100:5000/swagger
+   ```
+
+3. **Sprawdź logi w aplikacji:**
+   - Otwórz React Native DevTools
+   - Sprawdź `console.log('API_BASE_URL:', ...)`
+
+#### Automatyczne znajdowanie IP
+
+Możesz użyć skryptu PowerShell:
+
+**find-host-ip.ps1:**
+```powershell
+$bestIP = (Get-NetIPAddress -AddressFamily IPv4 | 
+    Where-Object { $_.IPAddress -notmatch '^(127\.|169\.254\.)' } | 
+    Select-Object -First 1).IPAddress
+
+Write-Host "Twoje IP: $bestIP" -ForegroundColor Green
+Write-Host "Użyj: http://${bestIP}:5000/api" -ForegroundColor Yellow
+```
+
+**Uruchom:**
+```powershell
+cd rn/SolutionOrdersMobile
+.\find-host-ip.ps1
+```
+
+### 1.5. adb reverse (Alternatywa dla Android bez Dockera)
 
 ```bash
 # Przekieruj port 5000 z urządzenia na komputer
@@ -86,10 +192,11 @@ const API_URL = 'http://localhost:5000/api';
 ```
 
 **⚠️ Musisz to robić po każdym restarcie emulatora!**
+**⚠️ NIE DZIAŁA z Dockerem - użyj lokalnego IP!**
 
 ---
 
-## CZĘŚĆ 2: TypeScript Models (15 minut)
+## CZĘŚĆ 2: TypeScript Models
 
 ### 2.1. src/types/models.ts
 
@@ -164,7 +271,7 @@ export interface UpdateItemRequest extends CreateItemRequest {
 
 ---
 
-## CZĘŚĆ 3: API Service z TypeScript (30 minut)
+## CZĘŚĆ 3: API Service z TypeScript
 
 ### 3.1. src/api/apiService.ts
 
@@ -345,7 +452,7 @@ export default new ApiService();
 
 ---
 
-## CZĘŚĆ 4: Context API dla Items (25 minut)
+## CZĘŚĆ 4: Context API dla Items
 
 ### 4.1. src/context/ItemsContext.tsx
 
@@ -480,35 +587,33 @@ export function useItems() {
 
 ---
 
-## CZĘŚĆ 5: App.tsx - Inicjalizacja (20 minut)
+## CZĘŚĆ 5: App.tsx - Inicjalizacja
 
 ### 5.1. Struktura App.tsx (NOWA - 2025)
 
 **App.tsx:**
 
-```typescript
+```tsx
+import React from 'react';
 import { View, StatusBar, useColorScheme, StyleSheet } from 'react-native';
 import { SafeAreaProvider, useSafeAreaInsets } from 'react-native-safe-area-context';
-import { NavigationContainer } from '@react-navigation/native';
 import { ItemsProvider } from './src/context/ItemsContext';
 import RootNavigator from './src/navigation/RootNavigator';
 
-function App() {
+function App(): React.JSX.Element {
   const isDarkMode = useColorScheme() === 'dark';
 
   return (
     <SafeAreaProvider>
       <StatusBar barStyle={isDarkMode ? 'light-content' : 'dark-content'} />
       <ItemsProvider>
-        <NavigationContainer>
-          <AppContent />
-        </NavigationContainer>
+        <AppContent />
       </ItemsProvider>
     </SafeAreaProvider>
   );
 }
 
-function AppContent() {
+function AppContent(): React.JSX.Element {
   const insets = useSafeAreaInsets();
 
   return (
@@ -529,13 +634,14 @@ export default App;
 
 **Wyjaśnienie:**
 - `SafeAreaProvider` - obsługa notcha/dynamic island
-- `ItemsProvider` - wraps całą aplikację (context dostępny wszędzie)
-- `NavigationContainer` - React Navigation
-- `AppContent` - oddzielony komponent do safe areas
+- `ItemsProvider` - opakowuje całą aplikację (context dostępny wszędzie)
+- `NavigationContainer` - znajduje się w RootNavigator.tsx
+- `AppContent` - oddzielony komponent do obsługi safe areas
+- **WAŻNE:** ItemsProvider MUSI opakowywać komponenty używające useItems()
 
 ---
 
-## CZĘŚĆ 6: Ekran Listy Produktów (35 minut)
+## CZĘŚĆ 6: Ekran Listy Produktów
 
 ### 6.1. src/screens/ItemsScreen.tsx
 
@@ -775,7 +881,7 @@ export default ItemsScreen;
 
 ---
 
-## CZĘŚĆ 7: Formularz Tworzenia Produktu (30 minut)
+## CZĘŚĆ 7: Formularz Tworzenia Produktu
 
 ### 7.1. src/screens/CreateItemScreen.tsx
 
@@ -1040,11 +1146,13 @@ export default CreateItemScreen;
 
 ---
 
-## CZĘŚĆ 8: Nawigacja z Items (20 minut)
+## CZĘŚĆ 8: Nawigacja z Items
 
 ### 8.1. src/navigation/RootNavigator.tsx
 
-```typescript
+```tsx
+import React from 'react';
+import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import ItemsScreen from '../screens/ItemsScreen';
 import CreateItemScreen from '../screens/CreateItemScreen';
@@ -1052,31 +1160,33 @@ import EditItemScreen from '../screens/EditItemScreen';
 
 const Stack = createNativeStackNavigator();
 
-function RootNavigator() {
+function RootNavigator(): React.JSX.Element {
   return (
-    <Stack.Navigator
-      screenOptions={{
-        headerStyle: { backgroundColor: '#007AFF' },
-        headerTintColor: '#fff',
-        headerTitleStyle: { fontWeight: 'bold' },
-      }}
-    >
-      <Stack.Screen
-        name="Items"
-        component={ItemsScreen}
-        options={{ title: 'Produkty' }}
-      />
-      <Stack.Screen
-        name="CreateItem"
-        component={CreateItemScreen}
-        options={{ title: 'Nowy Produkt' }}
-      />
-      <Stack.Screen
-        name="EditItem"
-        component={EditItemScreen}
-        options={{ title: 'Edytuj Produkt' }}
-      />
-    </Stack.Navigator>
+    <NavigationContainer>
+      <Stack.Navigator
+        screenOptions={{
+          headerStyle: { backgroundColor: '#007AFF' },
+          headerTintColor: '#fff',
+          headerTitleStyle: { fontWeight: 'bold' },
+        }}
+      >
+        <Stack.Screen
+          name="Items"
+          component={ItemsScreen}
+          options={{ title: 'Produkty' }}
+        />
+        <Stack.Screen
+          name="CreateItem"
+          component={CreateItemScreen}
+          options={{ title: 'Nowy Produkt' }}
+        />
+        <Stack.Screen
+          name="EditItem"
+          component={EditItemScreen}
+          options={{ title: 'Edytuj Produkt' }}
+        />
+      </Stack.Navigator>
+    </NavigationContainer>
   );
 }
 
@@ -1085,7 +1195,7 @@ export default RootNavigator;
 
 ---
 
-## CZĘŚĆ 9: Pełny Workflow - Checklista (10 minut)
+## CZĘŚĆ 9: Pełny Workflow - Checklista
 
 ### Setup Flow:
 
@@ -1099,11 +1209,26 @@ export default RootNavigator;
 
 2. ✅ **React Native projekt:**
    ```bash
+   # Utwórz projekt
    npx @react-native-community/cli init SolutionOrdersMobile
+   cd SolutionOrdersMobile
+   
+   # Zainstaluj zależności
    pnpm install
-   pnpm add @react-navigation/native @react-navigation/native-stack
+   
+   # React Navigation
+   pnpm add @react-navigation/native
+   pnpm add @react-navigation/native-stack
    pnpm add react-native-screens react-native-safe-area-context
+   
+   # iOS (tylko Mac)
+   cd ios && pod install && cd ..
+   
+   # Rebuild aplikacji
+   pnpm react-native run-android  # lub run-ios
    ```
+   
+   **⚠️ WAŻNE:** Po instalacji natywnych zależności zawsze trzeba przebudować aplikację!
 
 3. ✅ **Twoja struktura folderów:**
    ```

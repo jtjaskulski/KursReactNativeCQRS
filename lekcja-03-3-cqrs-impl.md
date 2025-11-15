@@ -1,7 +1,6 @@
-# Lekcja 3.3: CQRS Implementacje - Queries i Commands (2 godziny)
+# Lekcja 3.3: CQRS Implementacje - Queries i Commands
 
 **Moduł:** .NET Backend - CQRS  
-**Czas trwania:** 2 godziny  
 **Poziom:** Średnio-zaawansowany
 
 ---
@@ -17,7 +16,7 @@ Po ukończeniu tej lekcji będziesz potrafić:
 
 ---
 
-## CZĘŚĆ 1: Vertical Slice Architecture (15 minut)
+## CZĘŚĆ 1: Vertical Slice Architecture
 
 ### 1.1. Czym jest Vertical Slice?
 
@@ -85,7 +84,7 @@ Features/
 
 ---
 
-## CZĘŚĆ 2: Pierwszy Query - GetAllItems (30 minut)
+## CZĘŚĆ 2: Pierwszy Query - GetAllItems
 
 ### 2.1. GetAllItemsQuery.cs
 
@@ -295,7 +294,7 @@ namespace SolutionOrdersReact.Server.Controllers
 
 ---
 
-## CZĘŚĆ 3: Query z Parametrem - GetItemById (20 minut)
+## CZĘŚĆ 3: Query z Parametrem - GetItemById
 
 ### 3.1. GetItemByIdQuery.cs
 
@@ -402,7 +401,7 @@ public async Task<IActionResult> GetById(int id)
 
 ---
 
-## CZĘŚĆ 4: Pierwszy Command - CreateItem (35 minut)
+## CZĘŚĆ 4: Pierwszy Command - CreateItem
 
 ### 4.1. CreateItemCommand.cs
 
@@ -555,7 +554,7 @@ Location: /api/items/3
 
 ---
 
-## CZĘŚĆ 5: Update i Delete Commands (30 minut)
+## CZĘŚĆ 5: Update i Delete Commands
 
 ### 5.1. UpdateItemCommand
 
@@ -769,10 +768,911 @@ public async Task<IActionResult> Delete(int id)
 
 ---
 
+## CZĘŚĆ 6: Pełny CRUD dla Categories
+
+### 6.1. Struktura Plików
+
+Utwórz następującą strukturę:
+
+```
+Dto/
+└── CategoryDto.cs
+
+Requests/
+└── Categories/
+    ├── Queries/
+    │   ├── GetAllCategoriesQuery.cs
+    │   └── GetCategoryByIdQuery.cs
+    └── Commands/
+        ├── CreateCategoryCommand.cs
+        ├── UpdateCategoryCommand.cs
+        └── DeleteCategoryCommand.cs
+
+Handlers/
+└── Categories/
+    ├── GetAllCategoriesHandler.cs
+    ├── GetCategoryByIdHandler.cs
+    ├── CreateCategoryHandler.cs
+    ├── UpdateCategoryHandler.cs
+    └── DeleteCategoryHandler.cs
+
+Controllers/
+└── CategoryController.cs
+```
+
+### 6.2. CategoryDto
+
+**Dto/CategoryDto.cs:**
+
+```csharp
+namespace SolutionOrdersReact.Server.Dto
+{
+    public class CategoryDto
+    {
+        public int IdCategory { get; set; }
+        public string? Name { get; set; }
+        public string? Description { get; set; }
+        public bool IsActive { get; set; }
+    }
+}
+```
+
+### 6.3. Queries
+
+**Requests/Categories/Queries/GetAllCategoriesQuery.cs:**
+
+```csharp
+using MediatR;
+using SolutionOrdersReact.Server.Dto;
+
+namespace SolutionOrdersReact.Server.Requests.Categories.Queries
+{
+    public class GetAllCategoriesQuery : IRequest<List<CategoryDto>>
+    {
+    }
+}
+```
+
+**Requests/Categories/Queries/GetCategoryByIdQuery.cs:**
+
+```csharp
+using MediatR;
+using SolutionOrdersReact.Server.Dto;
+
+namespace SolutionOrdersReact.Server.Requests.Categories.Queries
+{
+    public class GetCategoryByIdQuery : IRequest<CategoryDto?>
+    {
+        public int Id { get; set; }
+
+        public GetCategoryByIdQuery(int id)
+        {
+            Id = id;
+        }
+    }
+}
+```
+
+### 6.4. Query Handlers
+
+**Handlers/Categories/GetAllCategoriesHandler.cs:**
+
+```csharp
+using MediatR;
+using Microsoft.EntityFrameworkCore;
+using SolutionOrdersReact.Server.Dto;
+using SolutionOrdersReact.Server.Models;
+using SolutionOrdersReact.Server.Requests.Categories.Queries;
+
+namespace SolutionOrdersReact.Server.Handlers.Categories
+{
+    public class GetAllCategoriesHandler : IRequestHandler<GetAllCategoriesQuery, List<CategoryDto>>
+    {
+        private readonly ApplicationDbContext _context;
+        private readonly ILogger<GetAllCategoriesHandler> _logger;
+
+        public GetAllCategoriesHandler(
+            ApplicationDbContext context,
+            ILogger<GetAllCategoriesHandler> logger)
+        {
+            _context = context;
+            _logger = logger;
+        }
+
+        public async Task<List<CategoryDto>> Handle(
+            GetAllCategoriesQuery request,
+            CancellationToken cancellationToken)
+        {
+            _logger.LogInformation("Pobieranie wszystkich kategorii");
+
+            var categories = await _context.Categories
+                .Where(c => c.IsActive)
+                .OrderBy(c => c.Name)
+                .Select(c => new CategoryDto
+                {
+                    IdCategory = c.IdCategory,
+                    Name = c.Name,
+                    Description = c.Description,
+                    IsActive = c.IsActive
+                })
+                .ToListAsync(cancellationToken);
+
+            _logger.LogInformation("Pobrano {Count} kategorii", categories.Count);
+
+            return categories;
+        }
+    }
+}
+```
+
+**Handlers/Categories/GetCategoryByIdHandler.cs:**
+
+```csharp
+using MediatR;
+using Microsoft.EntityFrameworkCore;
+using SolutionOrdersReact.Server.Dto;
+using SolutionOrdersReact.Server.Models;
+using SolutionOrdersReact.Server.Requests.Categories.Queries;
+
+namespace SolutionOrdersReact.Server.Handlers.Categories
+{
+    public class GetCategoryByIdHandler : IRequestHandler<GetCategoryByIdQuery, CategoryDto?>
+    {
+        private readonly ApplicationDbContext _context;
+        private readonly ILogger<GetCategoryByIdHandler> _logger;
+
+        public GetCategoryByIdHandler(
+            ApplicationDbContext context,
+            ILogger<GetCategoryByIdHandler> logger)
+        {
+            _context = context;
+            _logger = logger;
+        }
+
+        public async Task<CategoryDto?> Handle(
+            GetCategoryByIdQuery request,
+            CancellationToken cancellationToken)
+        {
+            _logger.LogInformation("Pobieranie kategorii o ID: {Id}", request.Id);
+
+            var category = await _context.Categories
+                .Where(c => c.IdCategory == request.Id)
+                .Select(c => new CategoryDto
+                {
+                    IdCategory = c.IdCategory,
+                    Name = c.Name,
+                    Description = c.Description,
+                    IsActive = c.IsActive
+                })
+                .FirstOrDefaultAsync(cancellationToken);
+
+            if (category == null)
+            {
+                _logger.LogWarning("Kategoria o ID {Id} nie została znaleziona", request.Id);
+            }
+
+            return category;
+        }
+    }
+}
+```
+
+### 6.5. Commands
+
+**Requests/Categories/Commands/CreateCategoryCommand.cs:**
+
+```csharp
+using MediatR;
+
+namespace SolutionOrdersReact.Server.Requests.Categories.Commands
+{
+    public class CreateCategoryCommand : IRequest<int>
+    {
+        public string? Name { get; set; }
+        public string? Description { get; set; }
+    }
+}
+```
+
+**Requests/Categories/Commands/UpdateCategoryCommand.cs:**
+
+```csharp
+using MediatR;
+
+namespace SolutionOrdersReact.Server.Requests.Categories.Commands
+{
+    public class UpdateCategoryCommand : IRequest<Unit>
+    {
+        public int IdCategory { get; set; }
+        public string? Name { get; set; }
+        public string? Description { get; set; }
+        public bool IsActive { get; set; }
+    }
+}
+```
+
+**Requests/Categories/Commands/DeleteCategoryCommand.cs:**
+
+```csharp
+using MediatR;
+
+namespace SolutionOrdersReact.Server.Requests.Categories.Commands
+{
+    public class DeleteCategoryCommand : IRequest<Unit>
+    {
+        public int IdCategory { get; set; }
+
+        public DeleteCategoryCommand(int idCategory)
+        {
+            IdCategory = idCategory;
+        }
+    }
+}
+```
+
+### 6.6. Command Handlers
+
+**Handlers/Categories/CreateCategoryHandler.cs:**
+
+```csharp
+using MediatR;
+using SolutionOrdersReact.Server.Models;
+using SolutionOrdersReact.Server.Requests.Categories.Commands;
+
+namespace SolutionOrdersReact.Server.Handlers.Categories
+{
+    public class CreateCategoryHandler : IRequestHandler<CreateCategoryCommand, int>
+    {
+        private readonly ApplicationDbContext _context;
+        private readonly ILogger<CreateCategoryHandler> _logger;
+
+        public CreateCategoryHandler(
+            ApplicationDbContext context,
+            ILogger<CreateCategoryHandler> logger)
+        {
+            _context = context;
+            _logger = logger;
+        }
+
+        public async Task<int> Handle(
+            CreateCategoryCommand request,
+            CancellationToken cancellationToken)
+        {
+            _logger.LogInformation("Tworzenie nowej kategorii: {Name}", request.Name);
+
+            var category = new Category
+            {
+                Name = request.Name,
+                Description = request.Description,
+                IsActive = true
+            };
+
+            _context.Categories.Add(category);
+            await _context.SaveChangesAsync(cancellationToken);
+
+            _logger.LogInformation("Utworzono kategorię o ID: {IdCategory}", category.IdCategory);
+
+            return category.IdCategory;
+        }
+    }
+}
+```
+
+**Handlers/Categories/UpdateCategoryHandler.cs:**
+
+```csharp
+using MediatR;
+using Microsoft.EntityFrameworkCore;
+using SolutionOrdersReact.Server.Models;
+using SolutionOrdersReact.Server.Requests.Categories.Commands;
+
+namespace SolutionOrdersReact.Server.Handlers.Categories
+{
+    public class UpdateCategoryHandler : IRequestHandler<UpdateCategoryCommand, Unit>
+    {
+        private readonly ApplicationDbContext _context;
+        private readonly ILogger<UpdateCategoryHandler> _logger;
+
+        public UpdateCategoryHandler(
+            ApplicationDbContext context,
+            ILogger<UpdateCategoryHandler> logger)
+        {
+            _context = context;
+            _logger = logger;
+        }
+
+        public async Task<Unit> Handle(
+            UpdateCategoryCommand request,
+            CancellationToken cancellationToken)
+        {
+            _logger.LogInformation("Aktualizacja kategorii o ID: {IdCategory}", request.IdCategory);
+
+            var category = await _context.Categories
+                .FirstOrDefaultAsync(c => c.IdCategory == request.IdCategory, cancellationToken);
+
+            if (category == null)
+            {
+                _logger.LogError("Kategoria o ID {IdCategory} nie została znaleziona", request.IdCategory);
+                throw new KeyNotFoundException($"Kategoria o ID {request.IdCategory} nie istnieje");
+            }
+
+            category.Name = request.Name;
+            category.Description = request.Description;
+            category.IsActive = request.IsActive;
+
+            await _context.SaveChangesAsync(cancellationToken);
+
+            _logger.LogInformation("Zaktualizowano kategorię o ID: {IdCategory}", request.IdCategory);
+
+            return Unit.Value;
+        }
+    }
+}
+```
+
+**Handlers/Categories/DeleteCategoryHandler.cs:**
+
+```csharp
+using MediatR;
+using Microsoft.EntityFrameworkCore;
+using SolutionOrdersReact.Server.Models;
+using SolutionOrdersReact.Server.Requests.Categories.Commands;
+
+namespace SolutionOrdersReact.Server.Handlers.Categories
+{
+    public class DeleteCategoryHandler : IRequestHandler<DeleteCategoryCommand, Unit>
+    {
+        private readonly ApplicationDbContext _context;
+        private readonly ILogger<DeleteCategoryHandler> _logger;
+
+        public DeleteCategoryHandler(
+            ApplicationDbContext context,
+            ILogger<DeleteCategoryHandler> logger)
+        {
+            _context = context;
+            _logger = logger;
+        }
+
+        public async Task<Unit> Handle(
+            DeleteCategoryCommand request,
+            CancellationToken cancellationToken)
+        {
+            _logger.LogInformation("Usuwanie kategorii o ID: {IdCategory}", request.IdCategory);
+
+            var category = await _context.Categories
+                .FirstOrDefaultAsync(c => c.IdCategory == request.IdCategory, cancellationToken);
+
+            if (category == null)
+            {
+                _logger.LogError("Kategoria o ID {IdCategory} nie została znaleziona", request.IdCategory);
+                throw new KeyNotFoundException($"Kategoria o ID {request.IdCategory} nie istnieje");
+            }
+
+            // Soft delete - tylko ustawiamy IsActive = false
+            category.IsActive = false;
+            await _context.SaveChangesAsync(cancellationToken);
+
+            _logger.LogInformation("Usunięto (soft delete) kategorię o ID: {IdCategory}", request.IdCategory);
+
+            return Unit.Value;
+        }
+    }
+}
+```
+
+### 6.7. Controller
+
+**Controllers/CategoryController.cs:**
+
+```csharp
+using MediatR;
+using Microsoft.AspNetCore.Mvc;
+using SolutionOrdersReact.Server.Dto;
+using SolutionOrdersReact.Server.Requests.Categories.Commands;
+using SolutionOrdersReact.Server.Requests.Categories.Queries;
+
+namespace SolutionOrdersReact.Server.Controllers
+{
+    [ApiController]
+    [Route("api/[controller]")]
+    public class CategoryController : ControllerBase
+    {
+        private readonly IMediator _mediator;
+        private readonly ILogger<CategoryController> _logger;
+
+        public CategoryController(IMediator mediator, ILogger<CategoryController> logger)
+        {
+            _mediator = mediator;
+            _logger = logger;
+        }
+
+        /// <summary>
+        /// Pobiera wszystkie aktywne kategorie
+        /// </summary>
+        /// <returns>Lista kategorii</returns>
+        [HttpGet]
+        [ProducesResponseType(typeof(List<CategoryDto>), StatusCodes.Status200OK)]
+        public async Task<IActionResult> GetAll()
+        {
+            _logger.LogInformation("GET /api/category - Pobieranie wszystkich kategorii");
+
+            var query = new GetAllCategoriesQuery();
+            var result = await _mediator.Send(query);
+
+            return Ok(result);
+        }
+
+        /// <summary>
+        /// Pobiera kategorię po ID
+        /// </summary>
+        /// <param name="id">ID kategorii</param>
+        /// <returns>Kategoria</returns>
+        [HttpGet("{id}")]
+        [ProducesResponseType(typeof(CategoryDto), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<IActionResult> GetById(int id)
+        {
+            _logger.LogInformation("GET /api/category/{Id} - Pobieranie kategorii", id);
+
+            var query = new GetCategoryByIdQuery(id);
+            var result = await _mediator.Send(query);
+
+            if (result == null)
+            {
+                return NotFound(new { message = $"Kategoria o ID {id} nie została znaleziona" });
+            }
+
+            return Ok(result);
+        }
+
+        /// <summary>
+        /// Tworzy nową kategorię
+        /// </summary>
+        /// <param name="command">Dane nowej kategorii</param>
+        /// <returns>ID utworzonej kategorii</returns>
+        [HttpPost]
+        [ProducesResponseType(typeof(int), StatusCodes.Status201Created)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        public async Task<IActionResult> Create([FromBody] CreateCategoryCommand command)
+        {
+            _logger.LogInformation("POST /api/category - Tworzenie nowej kategorii");
+
+            var categoryId = await _mediator.Send(command);
+
+            return CreatedAtAction(
+                nameof(GetById),
+                new { id = categoryId },
+                new { id = categoryId, message = "Kategoria została utworzona" }
+            );
+        }
+
+        /// <summary>
+        /// Aktualizuje kategorię
+        /// </summary>
+        /// <param name="id">ID kategorii</param>
+        /// <param name="command">Zaktualizowane dane kategorii</param>
+        /// <returns>Status operacji</returns>
+        [HttpPut("{id}")]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<IActionResult> Update(int id, [FromBody] UpdateCategoryCommand command)
+        {
+            _logger.LogInformation("PUT /api/category/{Id} - Aktualizacja kategorii", id);
+
+            if (id != command.IdCategory)
+            {
+                return BadRequest(new { message = "ID w URL różni się od ID w body" });
+            }
+
+            try
+            {
+                await _mediator.Send(command);
+                return NoContent();
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(new { message = ex.Message });
+            }
+        }
+
+        /// <summary>
+        /// Usuwa kategorię (soft delete)
+        /// </summary>
+        /// <param name="id">ID kategorii</param>
+        /// <returns>Status operacji</returns>
+        [HttpDelete("{id}")]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<IActionResult> Delete(int id)
+        {
+            _logger.LogInformation("DELETE /api/category/{Id} - Usuwanie kategorii", id);
+
+            var command = new DeleteCategoryCommand(id);
+
+            try
+            {
+                await _mediator.Send(command);
+                return NoContent();
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(new { message = ex.Message });
+            }
+        }
+    }
+}
+```
+
+### 6.8. Konfiguracja Mappera (opcjonalnie)
+
+Jeśli używasz Mapster, dodaj konfigurację:
+
+**Mappings/CategoryMappingConfig.cs:**
+
+```csharp
+using Mapster;
+using SolutionOrdersReact.Server.Dto;
+using SolutionOrdersReact.Server.Models;
+
+namespace SolutionOrdersReact.Server.Mappings
+{
+    public static class CategoryMappingConfig
+    {
+        public static void Configure()
+        {
+            TypeAdapterConfig<Category, CategoryDto>
+                .NewConfig()
+                .Map(dest => dest.IdCategory, src => src.IdCategory)
+                .Map(dest => dest.Name, src => src.Name)
+                .Map(dest => dest.Description, src => src.Description)
+                .Map(dest => dest.IsActive, src => src.IsActive);
+        }
+    }
+}
+```
+
+I dodaj w **Program.cs**:
+
+```csharp
+// Mapster Configuration
+ItemMappingConfig.Configure();
+OrderMappingConfig.Configure();
+CategoryMappingConfig.Configure();  // Dodaj tę linię
+```
+
+### 6.9. Testowanie w Swagger
+
+#### Test 1: GET /api/category
+Pobierz wszystkie kategorie.
+
+**Oczekiwany wynik:**
+```json
+[
+  {
+    "idCategory": 1,
+    "name": "Elektronika",
+    "description": "Urządzenia elektroniczne",
+    "isActive": true
+  },
+  {
+    "idCategory": 2,
+    "name": "Żywność",
+    "description": "Produkty spożywcze",
+    "isActive": true
+  }
+]
+```
+
+#### Test 2: POST /api/category
+Utwórz nową kategorię.
+
+**Body:**
+```json
+{
+  "name": "AGD",
+  "description": "Artykuły gospodarstwa domowego"
+}
+```
+
+**Oczekiwany wynik:**
+```
+HTTP 201 Created
+{
+  "id": 3,
+  "message": "Kategoria została utworzona"
+}
+```
+
+#### Test 3: PUT /api/category/3
+Zaktualizuj kategorię.
+
+**Body:**
+```json
+{
+  "idCategory": 3,
+  "name": "AGD i RTV",
+  "description": "Artykuły gospodarstwa domowego i RTV",
+  "isActive": true
+}
+```
+
+**Oczekiwany wynik:**
+```
+HTTP 204 No Content
+```
+
+#### Test 4: DELETE /api/category/3
+Usuń kategorię (soft delete).
+
+**Oczekiwany wynik:**
+```
+HTTP 204 No Content
+```
+
+### 6.10. Podsumowanie CRUD dla Categories
+
+**Wzorzec CQRS w praktyce:**
+- ✅ **5 plików Request** (2 Queries + 3 Commands)
+- ✅ **5 plików Handler** (logika biznesowa)
+- ✅ **1 Controller** (5 endpointów REST API)
+- ✅ **1 DTO** (model dla API)
+- ✅ **Soft Delete** (IsActive = false)
+- ✅ **Logging** (info o każdej operacji)
+- ✅ **Error Handling** (KeyNotFoundException → 404)
+
+**Endpointy:**
+```
+GET    /api/category       → GetAllCategoriesQuery
+GET    /api/category/{id}  → GetCategoryByIdQuery
+POST   /api/category       → CreateCategoryCommand
+PUT    /api/category/{id}  → UpdateCategoryCommand
+DELETE /api/category/{id}  → DeleteCategoryCommand
+```
+
+---
+
+## CZĘŚĆ 7: Pełny CRUD dla UnitOfMeasurement
+
+### 7.1. Struktura Plików
+
+Analogicznie do Categories, utwórz:
+
+```
+Dto/
+└── UnitOfMeasurementDto.cs
+
+Requests/
+└── UnitOfMeasurements/
+    ├── Queries/
+    │   ├── GetAllUnitOfMeasurementsQuery.cs
+    │   └── GetUnitOfMeasurementByIdQuery.cs
+    └── Commands/
+        ├── CreateUnitOfMeasurementCommand.cs
+        ├── UpdateUnitOfMeasurementCommand.cs
+        └── DeleteUnitOfMeasurementCommand.cs
+
+Handlers/
+└── UnitOfMeasurements/
+    ├── GetAllUnitOfMeasurementsHandler.cs
+    ├── GetUnitOfMeasurementByIdHandler.cs
+    ├── CreateUnitOfMeasurementHandler.cs
+    ├── UpdateUnitOfMeasurementHandler.cs
+    └── DeleteUnitOfMeasurementHandler.cs
+
+Controllers/
+└── UnitOfMeasurementController.cs
+
+Mappings/
+└── UnitOfMeasurementMappingConfig.cs
+```
+
+### 7.2. Controller
+
+**Controllers/UnitOfMeasurementController.cs:**
+
+```csharp
+using MediatR;
+using Microsoft.AspNetCore.Mvc;
+using SolutionOrdersReact.Server.Dto;
+using SolutionOrdersReact.Server.Requests.UnitOfMeasurements.Commands;
+using SolutionOrdersReact.Server.Requests.UnitOfMeasurements.Queries;
+
+namespace SolutionOrdersReact.Server.Controllers
+{
+    [ApiController]
+    [Route("api/[controller]")]
+    public class UnitOfMeasurementController : ControllerBase
+    {
+        private readonly IMediator _mediator;
+        private readonly ILogger<UnitOfMeasurementController> _logger;
+
+        public UnitOfMeasurementController(IMediator mediator, ILogger<UnitOfMeasurementController> logger)
+        {
+            _mediator = mediator;
+            _logger = logger;
+        }
+
+        [HttpGet]
+        [ProducesResponseType(typeof(List<UnitOfMeasurementDto>), StatusCodes.Status200OK)]
+        public async Task<IActionResult> GetAll()
+        {
+            var query = new GetAllUnitOfMeasurementsQuery();
+            var result = await _mediator.Send(query);
+            return Ok(result);
+        }
+
+        [HttpGet("{id}")]
+        [ProducesResponseType(typeof(UnitOfMeasurementDto), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<IActionResult> GetById(int id)
+        {
+            var query = new GetUnitOfMeasurementByIdQuery(id);
+            var result = await _mediator.Send(query);
+
+            if (result == null)
+            {
+                return NotFound(new { message = $"Jednostka miary o ID {id} nie została znaleziona" });
+            }
+
+            return Ok(result);
+        }
+
+        [HttpPost]
+        [ProducesResponseType(typeof(int), StatusCodes.Status201Created)]
+        public async Task<IActionResult> Create([FromBody] CreateUnitOfMeasurementCommand command)
+        {
+            var unitId = await _mediator.Send(command);
+            return CreatedAtAction(nameof(GetById), new { id = unitId }, 
+                new { id = unitId, message = "Jednostka miary została utworzona" });
+        }
+
+        [HttpPut("{id}")]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<IActionResult> Update(int id, [FromBody] UpdateUnitOfMeasurementCommand command)
+        {
+            if (id != command.IdUnitOfMeasurement)
+            {
+                return BadRequest(new { message = "ID w URL różni się od ID w body" });
+            }
+
+            try
+            {
+                await _mediator.Send(command);
+                return NoContent();
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(new { message = ex.Message });
+            }
+        }
+
+        [HttpDelete("{id}")]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<IActionResult> Delete(int id)
+        {
+            var command = new DeleteUnitOfMeasurementCommand(id);
+
+            try
+            {
+                await _mediator.Send(command);
+                return NoContent();
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(new { message = ex.Message });
+            }
+        }
+    }
+}
+```
+
+### 7.3. Mapper
+
+**Mappings/UnitOfMeasurementMappingConfig.cs:**
+
+```csharp
+using Mapster;
+using SolutionOrdersReact.Server.Dto;
+using SolutionOrdersReact.Server.Models;
+
+namespace SolutionOrdersReact.Server.Mappings
+{
+    public static class UnitOfMeasurementMappingConfig
+    {
+        public static void Configure()
+        {
+            TypeAdapterConfig<UnitOfMeasurement, UnitOfMeasurementDto>
+                .NewConfig()
+                .Map(dest => dest.IdUnitOfMeasurement, src => src.IdUnitOfMeasurement)
+                .Map(dest => dest.Name, src => src.Name)
+                .Map(dest => dest.Description, src => src.Description)
+                .Map(dest => dest.IsActive, src => src.IsActive);
+        }
+    }
+}
+```
+
+**Program.cs:**
+
+```csharp
+// Mapster Configuration
+ItemMappingConfig.Configure();
+OrderMappingConfig.Configure();
+CategoryMappingConfig.Configure();
+UnitOfMeasurementMappingConfig.Configure();  // Dodaj tę linię
+```
+
+### 7.4. Testowanie
+
+**Test 1: GET /api/unitofmeasurement**
+
+```json
+[
+  {
+    "idUnitOfMeasurement": 1,
+    "name": "szt",
+    "description": "Sztuki",
+    "isActive": true
+  },
+  {
+    "idUnitOfMeasurement": 2,
+    "name": "kg",
+    "description": "Kilogramy",
+    "isActive": true
+  }
+]
+```
+
+**Test 2: POST /api/unitofmeasurement**
+
+```json
+{
+  "name": "l",
+  "description": "Litry"
+}
+```
+
+### 7.5. Podsumowanie CRUD
+
+**Wzorzec CQRS w praktyce:**
+- ✅ **3 endpointy** - Category, UnitOfMeasurement, Items
+- ✅ **Jednolity wzorzec** - wszystkie używają CQRS
+- ✅ **Soft Delete** - IsActive = false
+- ✅ **Logging** - każda operacja logowana
+- ✅ **RESTful API** - zgodność ze standardami
+
+**Struktura projektu:**
+```
+Controllers/
+├── CategoryController.cs         (5 endpoints)
+├── UnitOfMeasurementController.cs (5 endpoints)
+└── ItemsController.cs            (5 endpoints)
+
+Dto/
+├── CategoryDto.cs
+├── UnitOfMeasurementDto.cs
+└── ItemDto.cs
+
+Requests/
+├── Categories/
+├── UnitOfMeasurements/
+└── Items/
+
+Handlers/
+├── Categories/
+├── UnitOfMeasurements/
+└── Items/
+```
+
+---
+
 ## 📝 Zadania Praktyczne
 
-### Zadanie 1: CRUD dla Categories
-Zaimplementuj pełny CRUD (GetAll, GetById, Create, Update, Delete) dla Categories.
+### Zadanie 1: CRUD dla Client
+Zaimplementuj pełny CRUD (GetAll, GetById, Create, Update, Delete) dla klientów (`Client`).
 
 ### Zadanie 2: Query z Filtrowaniem
 Dodaj `GetItemsByCategoryQuery` - zwraca produkty z danej kategorii.

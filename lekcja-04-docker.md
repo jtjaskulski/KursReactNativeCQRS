@@ -1,7 +1,6 @@
-# Lekcja 4: Docker + SQL Server + Migracje (2 godziny)
+# Lekcja 4: Docker + SQL Server + Migracje
 
 **Moduł:** Infrastruktura  
-**Czas trwania:** 2 godziny  
 **Poziom:** Średnio-zaawansowany
 
 ---
@@ -17,7 +16,7 @@ Po ukończeniu tej lekcji będziesz potrafić:
 
 ---
 
-## CZĘŚĆ 1: Docker Basics (20 minut)
+## CZĘŚĆ 1: Docker Basics
 
 ### 1.1. Czym jest Docker?
 
@@ -65,7 +64,7 @@ sudo usermod -aG docker $USER
 
 ---
 
-## CZĘŚĆ 2: SQL Server w Docker (30 minut)
+## CZĘŚĆ 2: SQL Server w Docker
 
 ### 2.1. Utworzenie docker-compose-db.yml
 
@@ -184,7 +183,7 @@ docker-compose -f docker-compose-db.yml down -v
 
 ---
 
-## CZĘŚĆ 3: Entity Framework Migrations (40 minut)
+## CZĘŚĆ 3: Entity Framework Migrations
 
 ### 3.1. Sprawdzenie Connection String
 
@@ -316,7 +315,7 @@ if (app.Environment.IsDevelopment())
 
 ---
 
-## CZĘŚĆ 4: Weryfikacja i Debugowanie (30 minut)
+## CZĘŚĆ 4: Weryfikacja i Debugowanie
 
 ### 4.1. Podłączenie do SQL Server (SSMS/Azure Data Studio)
 
@@ -553,6 +552,203 @@ docker-compose down
 ```
 
 API będzie dostępne: `http://localhost:5000`
+
+---
+
+## CZĘŚĆ 8: Połączenie React Native z Docker
+
+### 8.1. Problem z localhost
+
+**❌ Android Emulator NIE MOŻE połączyć się z `localhost`!**
+
+Gdy API działa w Dockerze:
+- `localhost` w emulatorze = sam emulator
+- `10.0.2.2` = komputer host, ALE Docker pracuje w swojej sieci
+- **Rozwiązanie:** Użyj lokalnego IP komputera
+
+### 8.2. Znajdź swoje IP
+
+**Windows PowerShell:**
+```powershell
+ipconfig
+```
+
+Szukaj `IPv4 Address`:
+```
+Ethernet adapter Ethernet:
+   IPv4 Address. . . . . . . . : 192.168.1.100  <-- TO!
+```
+
+**macOS/Linux:**
+```bash
+ifconfig | grep "inet "
+# lub
+ip addr show
+```
+
+### 8.3. Skrypt pomocniczy
+
+Stwórz plik `find-host-ip.ps1` w projekcie React Native:
+
+```powershell
+$bestIP = (Get-NetIPAddress -AddressFamily IPv4 | 
+    Where-Object { $_.IPAddress -notmatch '^(127\.|169\.254\.)' } | 
+    Select-Object -First 1).IPAddress
+
+Write-Host "==================================" -ForegroundColor Cyan
+Write-Host "Twoje IP: $bestIP" -ForegroundColor Green
+Write-Host "Użyj w config.ts:" -ForegroundColor Yellow
+Write-Host "  return 'http://${bestIP}:5000/api';" -ForegroundColor White
+Write-Host "==================================" -ForegroundColor Cyan
+
+# Test połączenia
+try {
+    $response = Invoke-WebRequest -Uri "http://${bestIP}:5000/api/category" -TimeoutSec 3
+    Write-Host "✓ API odpowiada!" -ForegroundColor Green
+} catch {
+    Write-Host "✗ Nie można połączyć się z API" -ForegroundColor Red
+}
+```
+
+**Uruchom:**
+```powershell
+cd rn/SolutionOrdersMobile
+.\find-host-ip.ps1
+```
+
+### 8.4. Konfiguracja aplikacji mobilnej
+
+**src/api/config.ts:**
+```typescript
+import { Platform } from 'react-native';
+
+const getBaseUrl = (): string => {
+  if (__DEV__) {
+    // DOCKER: Użyj lokalnego IP (nie localhost!)
+    if (Platform.OS === 'android') {
+      return 'http://192.168.1.100:5000/api';  // TWOJE IP!
+    } else if (Platform.OS === 'ios') {
+      return 'http://192.168.1.100:5000/api';  // TWOJE IP!
+    }
+  }
+  
+  return 'https://your-production-api.com/api';
+};
+
+export const API_BASE_URL = getBaseUrl();
+
+// Debug - sprawdź w logach
+console.log('API_BASE_URL:', API_BASE_URL);
+```
+
+### 8.5. Sprawdź CORS
+
+Backend musi zezwalać na połączenia z każdego źródła w development.
+
+**Program.cs:**
+```csharp
+// CORS - dla development zezwalaj na wszystkie połączenia
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowAll",
+        policy => policy
+            .AllowAnyOrigin()
+            .AllowAnyMethod()
+            .AllowAnyHeader());
+});
+
+// ...
+
+var app = builder.Build();
+
+// ...
+
+app.UseCors("AllowAll");  // <-- WAŻNE!
+```
+
+### 8.6. Test połączenia
+
+1. **Docker działa:**
+   ```bash
+   docker ps
+   # Powinien pokazać: orders-react-api
+   ```
+
+2. **Swagger w przeglądarce:**
+   ```
+   http://localhost:5000/swagger
+   http://192.168.1.100:5000/swagger
+   ```
+
+3. **Test z mobilki:**
+   - Uruchom aplikację
+   - Sprawdź logi: `console.log('API_BASE_URL:', ...)`
+   - Powinna wyświetlić lista Items
+
+### 8.7. Troubleshooting
+
+#### Problem: "Network request failed"
+
+**Przyczyny:**
+1. ✗ Docker nie działa: `docker ps`
+2. ✗ Złe IP w config.ts
+3. ✗ Windows Firewall blokuje port 5000
+4. ✗ CORS nie jest skonfigurowany
+
+**Rozwiązanie:**
+```powershell
+# 1. Sprawdź Docker
+docker ps
+
+# 2. Sprawdź czy API odpowiada
+curl http://192.168.1.100:5000/api/category
+
+# 3. Sprawdź Firewall
+# Windows Defender Firewall > Advanced Settings > Inbound Rules
+# Dodaj regułę dla portu 5000 TCP
+
+# 4. Restart Docker
+docker-compose restart api
+
+# 5. Restart aplikacji mobilnej
+pnpm start
+```
+
+#### Problem: Telefon fizyczny nie może się połączyć
+
+**Wymagania:**
+- Telefon i komputer w tej samej sieci Wi-Fi
+- Użyj lokalnego IP (np. 192.168.1.100)
+- Firewall nie blokuje portu 5000
+
+**Test:**
+```bash
+# Z telefonu w przeglądarce
+http://192.168.1.100:5000/swagger
+```
+
+### 8.8. Podsumowanie
+
+**Docker + React Native:**
+```
+┌─────────────────┐         ┌──────────────────┐
+│  React Native   │         │   Docker API     │
+│  (Emulator)     │ ─────>  │   port 5000      │
+│                 │         │                  │
+│ IP: 10.0.2.2    │         │ Host: 0.0.0.0    │
+│ łączy się z:    │         │ (wszystkie IP)   │
+│ 192.168.1.100   │         │                  │
+└─────────────────┘         └──────────────────┘
+        ↓                           ↓
+    (NIE localhost!)      (Docker w bridged network)
+```
+
+**Kluczowe punkty:**
+- ✅ Użyj lokalnego IP komputera (np. 192.168.1.100)
+- ✅ NIE używaj `localhost` ani `10.0.2.2` dla Dockera
+- ✅ Skonfiguruj CORS na `AllowAll`
+- ✅ Sprawdź Windows Firewall
+- ✅ Test API najpierw w przeglądarce
 
 ---
 

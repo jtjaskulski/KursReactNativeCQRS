@@ -128,7 +128,7 @@ pnpm start --reset-cache
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 
-function App(): JSX.Element {
+function App(): React.JSX.Element {
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Hello React Native!</Text>
@@ -160,7 +160,7 @@ export default App;
 ```
 
 **Wyjaśnienie:**
-- `JSX.Element` - typ zwracany przez komponent React
+- `React.JSX.Element` - typ zwracany przez komponent React
 - `StyleSheet.create()` - tworzy zoptymalizowane style
 - `flex: 1` - komponent zajmuje całą dostępną przestrzeń
 
@@ -229,7 +229,7 @@ export default Greeting;
 ```tsx
 import Greeting from './src/components/Greeting';
 
-function App(): JSX.Element {
+function App(): React.JSX.Element {
   return (
     <View style={styles.container}>
       <Greeting name="Anna" age={25} />
@@ -548,27 +548,69 @@ export default SimpleForm;
 
 ### 6.1. Instalacja React Navigation
 
+**Krok 1: Zainstaluj główne pakiety**
 ```bash
 pnpm add @react-navigation/native
 pnpm add @react-navigation/native-stack
+```
+
+**Krok 2: Zainstaluj zależności natywne**
+```bash
 pnpm add react-native-screens react-native-safe-area-context
 ```
 
-**Android - dodatkowa konfiguracja:**
+**Krok 3: Android - konfiguracja natywna**
 
-Edytuj `android/app/src/main/java/.../MainActivity.java`:
+Edytuj `android/app/src/main/java/com/solutionordersmobile/MainActivity.java` (lub `.kt` dla Kotlin):
 
 ```java
+package com.solutionordersmobile;
+
 import android.os.Bundle;
+import com.facebook.react.ReactActivity;
+import com.facebook.react.ReactActivityDelegate;
+import com.facebook.react.defaults.DefaultNewArchitectureEntryPoint;
+import com.facebook.react.defaults.DefaultReactActivityDelegate;
 
 public class MainActivity extends ReactActivity {
+
+  @Override
+  protected String getMainComponentName() {
+    return "SolutionOrdersMobile";
+  }
+
   @Override
   protected void onCreate(Bundle savedInstanceState) {
-    super.onCreate(null);
+    super.onCreate(null);  // WAŻNE: null zamiast savedInstanceState
   }
-  // ...
+
+  @Override
+  protected ReactActivityDelegate createReactActivityDelegate() {
+    return new DefaultReactActivityDelegate(
+        this,
+        getMainComponentName(),
+        DefaultNewArchitectureEntryPoint.getFabricEnabled());
+  }
 }
 ```
+
+**Krok 4: iOS - instalacja podów (tylko Mac)**
+```bash
+cd ios
+pod install
+cd ..
+```
+
+**Krok 5: Rebuild aplikacji**
+```bash
+# Android
+pnpm react-native run-android
+
+# iOS (tylko Mac)
+pnpm react-native run-ios
+```
+
+**⚠️ WAŻNE:** Po instalacji natywnych pakietów ZAWSZE trzeba przebudować aplikację (nie wystarczy Hot Reload)!
 
 ### 6.2. Typy dla Nawigacji
 
@@ -598,7 +640,7 @@ import { RootStackParamList } from './types';
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
-const RootNavigator: React.FC = () => {
+function RootNavigator(): React.JSX.Element {
   return (
     <NavigationContainer>
       <Stack.Navigator
@@ -622,7 +664,7 @@ const RootNavigator: React.FC = () => {
       </Stack.Navigator>
     </NavigationContainer>
   );
-};
+}
 
 export default RootNavigator;
 ```

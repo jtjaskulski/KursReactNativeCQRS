@@ -77,7 +77,60 @@ const getBaseUrl = (): string => {
 export const API_BASE_URL = getBaseUrl();
 ```
 
-### 1.4. adb reverse (Alternatywa dla Android)
+### 1.4. Konfiguracja dla Docker (WAŻNE!)
+
+**Problem:** Gdy API działa w Dockerze, `10.0.2.2` i `localhost` NIE DZIAŁAJĄ dla Android Emulator!
+
+**Rozwiązanie:** Użyj lokalnego IP swojego komputera.
+
+#### Znajdź swoje IP
+
+**Windows PowerShell:**
+```powershell
+ipconfig
+```
+Szukaj `IPv4 Address` (np. `192.168.1.100`)
+
+#### Zaktualizuj config.ts
+
+**src/api/config.ts:**
+```typescript
+import { Platform } from 'react-native';
+
+const getBaseUrl = (): string => {
+  if (__DEV__) {
+    // DOCKER: Użyj lokalnego IP komputera (nie localhost!)
+    if (Platform.OS === 'android') {
+      return 'http://192.168.1.100:5000/api';  // TWOJE IP!
+    } else if (Platform.OS === 'ios') {
+      return 'http://192.168.1.100:5000/api';  // TWOJE IP!
+    }
+  }
+  
+  return 'https://your-production-api.com/api';
+};
+
+export const API_BASE_URL = getBaseUrl();
+console.log('API_BASE_URL:', API_BASE_URL);
+```
+
+#### Backend CORS
+
+**Program.cs:**
+```csharp
+// CORS - dla development zezwalaj na wszystkie połączenia
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowAll",
+        policy => policy.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader());
+});
+
+app.UseCors("AllowAll");
+```
+
+**📖 Szczegóły:** Zobacz Lekcja 4, część 8 - "Połączenie React Native z Docker"
+
+### 1.5. adb reverse (Alternatywa dla Android bez Dockera)
 
 ```bash
 # Przekieruj port 5000 z urządzenia na komputer
@@ -88,6 +141,7 @@ const API_URL = 'http://localhost:5000/api';
 ```
 
 **⚠️ Musisz to robić po każdym restarcie emulatora!**
+**⚠️ NIE DZIAŁA z Dockerem - użyj lokalnego IP!**
 
 ---
 
@@ -777,7 +831,7 @@ export function SimpleCrudList<T>({
   onDelete,
   onRefresh,
   getFormDataFromItem,
-}: SimpleCrudListProps<T>): JSX.Element {
+}: SimpleCrudListProps<T>): React.JSX.Element {
   const [showForm, setShowForm] = useState(false);
   const [editingItem, setEditingItem] = useState<T | null>(null);
   const [formData, setFormData] = useState<Record<string, string>>({});
