@@ -1045,9 +1045,26 @@ Dodaj wyszukiwanie po nazwie.
 
 ---
 
+## 🔍 Pytania Kontrolne
+
+1. Dlaczego `localhost` nie działa w Android Emulator?
+2. Co to jest `10.0.2.2` i kiedy go używamy?
+3. Jak działa hook `useFetch` i co zwraca?
+4. Po co używamy generycznego komponentu `SimpleCrudList`?
+5. Jak obsługujemy błędy sieciowe w React Native?
+6. Czym różni się konfiguracja IP dla Docker vs lokalne API?
+
+---
+
 ## ➡️ Następna Lekcja
 
-**[Lekcja 8: FluentValidation + Pipeline Behaviors](./lekcja-08-walidacja.md)**
+**[Lekcja 6: Relacje 1:M – Entity Framework i Powiązane Dane](./lekcja-06-relacje-1m.md)**
+
+W następnej lekcji:
+- Modelowanie relacji w EF Core
+- Eager loading z `Include()`
+- Mapowanie do DTO z zagnieżdżonymi danymi
+- Pickers w React Native
 
 ---
 

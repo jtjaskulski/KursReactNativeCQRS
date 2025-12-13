@@ -1,6 +1,7 @@
-# Lekcja 3.3: CQRS Implementacje - Queries i Commands
+# Lekcja 3: .NET Backend – CQRS Queries i Commands
 
 **Moduł:** .NET Backend - CQRS  
+**Czas trwania:** 3 godziny  
 **Poziom:** Średnio-zaawansowany
 
 ---
@@ -16,9 +17,13 @@ Po ukończeniu tej lekcji będziesz potrafić:
 
 ---
 
-## CZĘŚĆ 1: Vertical Slice Architecture
+## CZĘŚĆ 1: Vertical Slice Architecture (25 minut)
 
 ### 1.1. Czym jest Vertical Slice?
+
+**SCRIPT dla prowadzącego:**
+
+> „Vertical Slice to inny sposób organizacji kodu niż tradycyjne warstwy. Zamiast dzielić na Controllers/Services/Repositories, dzielimy na Features. Każdy feature zawiera wszystko czego potrzebuje."
 
 **Tradycyjna architektura (Layered):**
 ```
@@ -1682,9 +1687,26 @@ Rozszerz `GetAllItemsQuery` o parametry: `PageNumber`, `PageSize`.
 
 ---
 
+## 🔍 Pytania Kontrolne
+
+1. Czym różni się Query od Command w CQRS?
+2. Co to jest Vertical Slice Architecture i jakie ma zalety?
+3. Jak działa `Include()` w Entity Framework Core?
+4. Dlaczego używamy DTO zamiast encji bezpośrednio?
+5. Co zwraca `Unit.Value` w MediatR?
+6. Czym jest soft delete i kiedy go stosować?
+
+---
+
 ## ➡️ Następna Lekcja
 
-**[Lekcja 5: React Native - CRUD dla Słowników](./lekcja-05-react-native-crud-slowniki.md)**
+**[Lekcja 4: Docker – SQL Server i Konteneryzacja](./lekcja-04-docker.md)**
+
+W następnej lekcji:
+- Docker Compose dla SQL Server
+- Konfiguracja connection string
+- Migracje Entity Framework
+- Połączenie React Native z Dockerem
 
 ---
 

@@ -1,4 +1,4 @@
-# Lekcja 2: React Native + TypeScript - Setup i Podstawy (4 godziny)
+# Lekcja 2: React Native + TypeScript – Setup i Podstawy
 
 **Moduł:** React Native Podstawy  
 **Czas trwania:** 4 godziny  
@@ -23,27 +23,56 @@ Po ukończeniu tej lekcji będziesz potrafić:
 
 ### 1.1. Wymagania Wstępne
 
+**SCRIPT dla prowadzącego:**
+
+> „Zanim zaczniemy kodować, upewnijmy się że każdy ma zainstalowane wszystko co potrzebne. React Native wymaga więcej setupu niż zwykły React – musimy mieć emulatory."
+
 **Zainstalowane:**
 - ✅ Node.js 18+ (`node --version`)
 - ✅ pnpm (`npm install -g pnpm`)
 - ✅ Android Studio + Android SDK (dla Android)
 - ✅ Xcode (dla iOS - tylko Mac)
+- ✅ Java JDK 17+ (`java --version`)
 
-### 1.2. Instalacja React Native CLI
+**Diagram narzędzi:**
 
-```bash
-# Zainstaluj globalnie
-npm install -g react-native-cli
-
-# Sprawdź
-react-native --version
+```
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                    ŚRODOWISKO REACT NATIVE                                   │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                              │
+│   TWÓJ KOMPUTER                                                             │
+│   ┌───────────────────────────────────────────────────────────────────┐     │
+│   │                                                                    │     │
+│   │   Node.js          pnpm             React Native CLI              │     │
+│   │   ┌─────┐         ┌─────┐          ┌─────────────────┐            │     │
+│   │   │ v20 │   +     │pkg  │    +     │ npx @react-na.. │            │     │
+│   │   └─────┘         │mngr │          └─────────────────┘            │     │
+│   │                   └─────┘                                          │     │
+│   │                                                                    │     │
+│   │   ANDROID                          iOS (tylko Mac)                 │     │
+│   │   ┌─────────────────┐              ┌─────────────────┐            │     │
+│   │   │ Android Studio  │              │     Xcode       │            │     │
+│   │   │ • SDK Platform  │              │ • Simulator     │            │     │
+│   │   │ • SDK Tools     │              │ • CocoaPods     │            │     │
+│   │   │ • Emulator      │              └─────────────────┘            │     │
+│   │   │ • Java JDK 17   │                                             │     │
+│   │   └─────────────────┘                                             │     │
+│   │                                                                    │     │
+│   └───────────────────────────────────────────────────────────────────┘     │
+│                                                                              │
+└─────────────────────────────────────────────────────────────────────────────┘
 ```
 
-### 1.3. Utworzenie Projektu z TypeScript
+### 1.2. Utworzenie Projektu z TypeScript
+
+**SCRIPT dla prowadzącego:**
+
+> „W React Native 0.82+ TypeScript jest wbudowany – nie potrzebujemy osobnego template'u. Po prostu tworzymy projekt i dostajemy TypeScript out of the box."
 
 ```bash
-# Nowy projekt z TypeScript template
-npx @react-native-community/cli init SolutionOrdersMobile --template react-native-template-typescript
+# Nowy projekt (TypeScript jest domyślny w RN 0.82+)
+npx @react-native-community/cli init SolutionOrdersMobile
 
 # Przejdź do folderu
 cd SolutionOrdersMobile
@@ -52,16 +81,27 @@ cd SolutionOrdersMobile
 pnpm install
 ```
 
-### 1.4. Konfiguracja pnpm dla React Native
+**⚠️ Uwaga:** Jeśli widzisz `template.config.js not found` - to normalne, kontynuuj.
+
+### 1.3. Konfiguracja pnpm dla React Native
 
 **Utwórz plik `.npmrc`:**
+
 ```ini
 node-linker=hoisted
 ```
 
-**Dlaczego?** React Native potrzebuje "płaskiej" struktury `node_modules`. pnpm domyślnie tworzy symlinki, ale `node-linker=hoisted` mówi aby działać jak npm.
+**Po utworzeniu .npmrc:**
 
-### 1.5. Struktura Projektu
+```bash
+pnpm install
+```
+
+**SCRIPT dla prowadzącego:**
+
+> „pnpm domyślnie tworzy symlinki zamiast kopiować pakiety - to oszczędza miejsce. Ale React Native tego nie lubi, bo potrzebuje 'płaskiej' struktury node_modules. Dlatego ustawiamy node-linker=hoisted."
+
+### 1.4. Struktura Projektu
 
 ```
 SolutionOrdersMobile/
@@ -69,11 +109,12 @@ SolutionOrdersMobile/
 ├── ios/                  # Kod iOS (Swift/Objective-C)
 ├── node_modules/
 ├── src/                  # Nasz kod źródłowy (utworzymy)
-│   ├── api/
-│   ├── components/
-│   ├── screens/
-│   ├── types/
-│   └── navigation/
+│   ├── api/              # Komunikacja z backendem
+│   ├── components/       # Komponenty wielokrotnego użytku
+│   ├── screens/          # Ekrany aplikacji
+│   ├── hooks/            # Custom hooks
+│   ├── types/            # Typy TypeScript
+│   └── navigation/       # Konfiguracja nawigacji
 ├── App.tsx               # Główny komponent (TypeScript!)
 ├── tsconfig.json         # Konfiguracja TypeScript
 ├── package.json
@@ -81,7 +122,7 @@ SolutionOrdersMobile/
 └── babel.config.js
 ```
 
-### 1.6. Uruchomienie na Emulatorze Android
+### 1.5. Uruchomienie na Emulatorze Android
 
 **Krok 1: Uruchom emulator**
 - Otwórz Android Studio
@@ -89,15 +130,16 @@ SolutionOrdersMobile/
 - Uruchom emulator (np. Pixel 7)
 
 **Krok 2: Uruchom aplikację**
+
 ```bash
 pnpm react-native run-android
 ```
 
-**Pierwszy build może potrwać 5-10 minut!**
+**⏱️ Pierwszy build może potrwać 5-10 minut!**
 
 **Jeśli się powiedzie:** aplikacja otworzy się na emulatorze z ekranem powitalnym.
 
-### 1.7. Uruchomienie na iOS (tylko Mac)
+### 1.6. Uruchomienie na iOS (tylko Mac)
 
 ```bash
 cd ios
@@ -106,14 +148,19 @@ cd ..
 pnpm react-native run-ios
 ```
 
-### 1.8. Metro Bundler
+### 1.7. Metro Bundler
+
+**SCRIPT dla prowadzącego:**
+
+> „Metro to serce development experience w React Native. Obserwuje pliki, bundluje JavaScript i wysyła do urządzenia. Hot Reload działa dzięki Metro."
 
 **Metro** to bundler JavaScript dla React Native (jak Webpack dla web).
 
-Uruchamia się automatycznie z `run-android`/`run-ios`, ale możesz też:
 ```bash
+# Uruchom Metro osobno (jeśli potrzebne)
 pnpm start
-# lub z czyszczeniem cache:
+
+# Z czyszczeniem cache (gdy są problemy)
 pnpm start --reset-cache
 ```
 
@@ -124,6 +171,7 @@ pnpm start --reset-cache
 ### 2.1. Podstawowy Komponent
 
 **App.tsx:**
+
 ```tsx
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
@@ -159,24 +207,34 @@ const styles = StyleSheet.create({
 export default App;
 ```
 
-**Wyjaśnienie:**
-- `React.JSX.Element` - typ zwracany przez komponent React
-- `StyleSheet.create()` - tworzy zoptymalizowane style
-- `flex: 1` - komponent zajmuje całą dostępną przestrzeń
+**SCRIPT dla prowadzącego:**
+
+> „Zwróćcie uwagę na różnice od React Web: używamy View zamiast div, Text zamiast span, StyleSheet zamiast CSS. To podstawowe mapowanie."
+
+**Podstawowe komponenty React Native:**
+
+| Web (React) | Mobile (React Native) |
+|-------------|----------------------|
+| `<div>` | `<View>` |
+| `<span>`, `<p>` | `<Text>` |
+| `<button>` | `<Button>`, `<TouchableOpacity>` |
+| `<input>` | `<TextInput>` |
+| `<img>` | `<Image>` |
+| `<ul>` | `<FlatList>`, `<ScrollView>` |
 
 ### 2.2. Komponent z Props
 
-**Utwórz:** `src/components/Greeting.tsx`
+**src/components/Greeting.tsx:**
 
 ```tsx
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 
-// Interface dla Props
+// Interface dla Props (czyste typowanie!)
 interface GreetingProps {
   name: string;
-  age?: number;  // Opcjonalne
-  isVip?: boolean;
+  age?: number;       // Opcjonalne
+  isVip?: boolean;    // Opcjonalne z domyślną wartością
 }
 
 // Komponent z typowanymi Props
@@ -204,6 +262,11 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
     borderRadius: 8,
     marginVertical: 8,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,  // Android shadow
   },
   greeting: {
     fontSize: 18,
@@ -226,6 +289,7 @@ export default Greeting;
 ```
 
 **Użycie w App.tsx:**
+
 ```tsx
 import Greeting from './src/components/Greeting';
 
@@ -246,31 +310,32 @@ function App(): React.JSX.Element {
 
 ```tsx
 import React, { useState } from 'react';
-import { View, Text, Button, StyleSheet } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 
 const Counter: React.FC = () => {
   // useState z typem (inferencja automatyczna)
   const [count, setCount] = useState<number>(0);
 
-  const increment = (): void => {
-    setCount(count + 1);
-  };
-
-  const decrement = (): void => {
-    setCount(count - 1);
-  };
-
-  const reset = (): void => {
-    setCount(0);
-  };
+  const increment = (): void => setCount(prev => prev + 1);
+  const decrement = (): void => setCount(prev => prev - 1);
+  const reset = (): void => setCount(0);
 
   return (
     <View style={styles.container}>
       <Text style={styles.count}>{count}</Text>
+
       <View style={styles.buttons}>
-        <Button title="+" onPress={increment} />
-        <Button title="-" onPress={decrement} />
-        <Button title="Reset" onPress={reset} />
+        <TouchableOpacity style={styles.button} onPress={decrement}>
+          <Text style={styles.buttonText}>−</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity style={[styles.button, styles.resetButton]} onPress={reset}>
+          <Text style={styles.buttonText}>Reset</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity style={styles.button} onPress={increment}>
+          <Text style={styles.buttonText}>+</Text>
+        </TouchableOpacity>
       </View>
     </View>
   );
@@ -280,18 +345,36 @@ const styles = StyleSheet.create({
   container: {
     padding: 20,
     backgroundColor: '#fff',
-    borderRadius: 8,
+    borderRadius: 12,
     alignItems: 'center',
   },
   count: {
-    fontSize: 48,
+    fontSize: 64,
     fontWeight: 'bold',
     color: '#007AFF',
     marginBottom: 20,
   },
   buttons: {
     flexDirection: 'row',
-    columnGap: 10,  // gap wspierany od RN 0.71+, użyj columnGap lub marginRight
+    gap: 12,
+  },
+  button: {
+    width: 60,
+    height: 60,
+    backgroundColor: '#007AFF',
+    borderRadius: 30,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  resetButton: {
+    width: 80,
+    backgroundColor: '#FF3B30',
+    borderRadius: 8,
+  },
+  buttonText: {
+    color: '#fff',
+    fontSize: 24,
+    fontWeight: 'bold',
   },
 });
 
@@ -304,51 +387,83 @@ export default Counter;
 
 ### 3.1. StyleSheet vs Inline Styles
 
-**StyleSheet (ZALECANE):**
+**SCRIPT dla prowadzącego:**
+
+> „W React Native ZAWSZE używamy StyleSheet.create() zamiast inline styles. Jest to zoptymalizowane - style są przetwarzane raz i cache'owane."
+
+**✅ StyleSheet (ZALECANE):**
+
 ```tsx
 const styles = StyleSheet.create({
   container: {
     padding: 20,
+    backgroundColor: '#fff',
   },
 });
 
 <View style={styles.container} />
 ```
 
-**Inline styles:**
+**⚠️ Inline styles (dla dynamicznych wartości):**
+
 ```tsx
-<View style={{ padding: 20, backgroundColor: '#fff' }} />
+<View style={{ padding: dynamicPadding, backgroundColor: isActive ? '#green' : '#gray' }} />
+```
+
+**✅ Łączenie stylów:**
+
+```tsx
+<View style={[styles.container, styles.centered, { marginTop: 10 }]} />
 ```
 
 ### 3.2. Flexbox - Layout System
 
-React Native używa **Flexbox** do layoutu (podobnie jak CSS Flexbox).
+**Diagram Flexbox:**
 
-**Podstawy:**
+```
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                          FLEXBOX W REACT NATIVE                              │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                              │
+│   flexDirection: 'column' (domyślnie)    flexDirection: 'row'               │
+│   ┌───────────────────┐                  ┌───────────────────┐              │
+│   │ ┌───────────────┐ │                  │ ┌───┐ ┌───┐ ┌───┐ │              │
+│   │ │     Item 1    │ │                  │ │ 1 │ │ 2 │ │ 3 │ │              │
+│   │ └───────────────┘ │                  │ └───┘ └───┘ └───┘ │              │
+│   │ ┌───────────────┐ │                  └───────────────────┘              │
+│   │ │     Item 2    │ │                                                      │
+│   │ └───────────────┘ │                                                      │
+│   │ ┌───────────────┐ │                                                      │
+│   │ │     Item 3    │ │                                                      │
+│   │ └───────────────┘ │                                                      │
+│   └───────────────────┘                                                      │
+│                                                                              │
+│   justifyContent (główna oś)         alignItems (poprzeczna oś)             │
+│   ─────────────────────────          ───────────────────────────            │
+│   'flex-start'   │ na początku       'flex-start'   │ na początku          │
+│   'center'       │ na środku         'center'       │ na środku            │
+│   'flex-end'     │ na końcu          'flex-end'     │ na końcu             │
+│   'space-between'│ równe odstępy     'stretch'      │ rozciągnij           │
+│   'space-around' │ odstępy dookoła                                          │
+│                                                                              │
+└─────────────────────────────────────────────────────────────────────────────┘
+```
+
+**Przykład:**
+
 ```tsx
 const styles = StyleSheet.create({
   container: {
-    flex: 1,                    // Zajmuje całą przestrzeń
-    flexDirection: 'column',    // 'row' | 'column' (domyślnie column)
-    justifyContent: 'center',   // Wyrównanie głównej osi
-    alignItems: 'center',       // Wyrównanie poprzecznej osi
+    flex: 1,                    // Zajmuje całą dostępną przestrzeń
+    flexDirection: 'column',    // Elementy jeden pod drugim (domyślnie)
+    justifyContent: 'center',   // Wyśrodkowane pionowo
+    alignItems: 'center',       // Wyśrodkowane poziomo
+    padding: 20,
   },
-});
-```
-
-**Przykład - 3 przyciski obok siebie:**
-```tsx
-<View style={styles.row}>
-  <Button title="A" />
-  <Button title="B" />
-  <Button title="C" />
-</View>
-
-const styles = StyleSheet.create({
   row: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    padding: 20,
+    width: '100%',
   },
 });
 ```
@@ -356,69 +471,72 @@ const styles = StyleSheet.create({
 ### 3.3. Responsywne Wymiary
 
 **Dimensions API:**
-```tsx
-import { Dimensions } from 'react-native';
 
+```tsx
+import { Dimensions, useWindowDimensions } from 'react-native';
+
+// Statyczne (nie aktualizuje się przy obrocie)
 const { width, height } = Dimensions.get('window');
 
-const styles = StyleSheet.create({
-  container: {
-    width: width * 0.9,   // 90% szerokości ekranu
-    height: height / 2,   // Połowa wysokości
-  },
-});
-```
+// Hook (aktualizuje się przy obrocie) - ZALECANE
+const MyComponent: React.FC = () => {
+  const { width, height } = useWindowDimensions();
 
-**Relative units:**
-```tsx
-const styles = StyleSheet.create({
-  container: {
-    width: '90%',       // Procent rodzica
-    padding: 20,        // Pixels (pt)
-  },
-});
+  return (
+    <View style={{ width: width * 0.9, height: height / 3 }}>
+      {/* 90% szerokości, 1/3 wysokości */}
+    </View>
+  );
+};
 ```
 
 ---
 
 ## CZĘŚĆ 4: Lista i FlatList (30 minut)
 
-### 4.1. Prosty Map
+### 4.1. FlatList - Zoptymalizowana Lista
 
-**⚠️ NIE ZALECANE dla długich list:**
-```tsx
-const items = ['Jabłko', 'Banan', 'Pomarańcza'];
+**SCRIPT dla prowadzącego:**
 
-{items.map((item, index) => (
-  <Text key={index}>{item}</Text>
-))}
-```
+> „FlatList to JEDYNY sposób na wyświetlanie długich list w React Native. Używa virtualizacji - renderuje tylko widoczne elementy. Dla 10 000 produktów zużyje tyle samo pamięci co dla 10."
 
-### 4.2. FlatList (ZALECANE)
-
-**FlatList** = zoptymalizowana lista (lazy loading, virtualizacja)
+**src/components/ItemList.tsx:**
 
 ```tsx
 import React from 'react';
-import { View, Text, FlatList, StyleSheet } from 'react-native';
+import { View, Text, FlatList, StyleSheet, TouchableOpacity } from 'react-native';
 
 interface Item {
   id: string;
   name: string;
   price: number;
+  category: string;
 }
 
-const ItemList: React.FC = () => {
-  const items: Item[] = [
-    { id: '1', name: 'Laptop', price: 3000 },
-    { id: '2', name: 'Monitor', price: 800 },
-    { id: '3', name: 'Mysz', price: 50 },
-  ];
+interface ItemListProps {
+  items: Item[];
+  onItemPress?: (item: Item) => void;
+}
 
+const ItemList: React.FC<ItemListProps> = ({ items, onItemPress }) => {
   const renderItem = ({ item }: { item: Item }) => (
-    <View style={styles.item}>
-      <Text style={styles.name}>{item.name}</Text>
-      <Text style={styles.price}>{item.price} zł</Text>
+    <TouchableOpacity
+      style={styles.item}
+      onPress={() => onItemPress?.(item)}
+    >
+      <View style={styles.itemContent}>
+        <Text style={styles.name}>{item.name}</Text>
+        <Text style={styles.category}>{item.category}</Text>
+      </View>
+      <Text style={styles.price}>{item.price.toFixed(2)} zł</Text>
+    </TouchableOpacity>
+  );
+
+  const renderSeparator = () => <View style={styles.separator} />;
+
+  const renderEmpty = () => (
+    <View style={styles.empty}>
+      <Text style={styles.emptyText}>Brak produktów</Text>
     </View>
   );
 
@@ -427,29 +545,53 @@ const ItemList: React.FC = () => {
       data={items}
       renderItem={renderItem}
       keyExtractor={(item) => item.id}
-      style={styles.list}
+      ItemSeparatorComponent={renderSeparator}
+      ListEmptyComponent={renderEmpty}
+      contentContainerStyle={styles.list}
     />
   );
 };
 
 const styles = StyleSheet.create({
   list: {
-    flex: 1,
+    padding: 16,
   },
   item: {
     flexDirection: 'row',
     justifyContent: 'space-between',
+    alignItems: 'center',
     padding: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: '#eee',
+    backgroundColor: '#fff',
+    borderRadius: 8,
+  },
+  itemContent: {
+    flex: 1,
   },
   name: {
     fontSize: 16,
-    fontWeight: '500',
+    fontWeight: '600',
+    color: '#333',
+  },
+  category: {
+    fontSize: 12,
+    color: '#999',
+    marginTop: 4,
   },
   price: {
-    fontSize: 16,
+    fontSize: 18,
+    fontWeight: 'bold',
     color: '#007AFF',
+  },
+  separator: {
+    height: 8,
+  },
+  empty: {
+    padding: 40,
+    alignItems: 'center',
+  },
+  emptyText: {
+    color: '#999',
+    fontSize: 16,
   },
 });
 
@@ -462,81 +604,152 @@ export default ItemList;
 
 ### 5.1. Prosty Formularz
 
+**src/components/SimpleForm.tsx:**
+
 ```tsx
 import React, { useState } from 'react';
-import { View, TextInput, Button, Text, StyleSheet } from 'react-native';
+import {
+  View,
+  TextInput,
+  TouchableOpacity,
+  Text,
+  StyleSheet,
+  Alert,
+  KeyboardAvoidingView,
+  Platform,
+} from 'react-native';
 
 interface FormData {
   name: string;
   email: string;
+  phone: string;
 }
 
 const SimpleForm: React.FC = () => {
   const [formData, setFormData] = useState<FormData>({
     name: '',
     email: '',
+    phone: '',
   });
 
-  const [submitted, setSubmitted] = useState<boolean>(false);
+  const [errors, setErrors] = useState<Partial<FormData>>({});
+
+  const validate = (): boolean => {
+    const newErrors: Partial<FormData> = {};
+
+    if (!formData.name.trim()) {
+      newErrors.name = 'Imię jest wymagane';
+    }
+
+    if (!formData.email.trim()) {
+      newErrors.email = 'Email jest wymagany';
+    } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
+      newErrors.email = 'Nieprawidłowy email';
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
 
   const handleSubmit = (): void => {
-    console.log('Submitted:', formData);
-    setSubmitted(true);
+    if (validate()) {
+      Alert.alert('Sukces', `Wysłano: ${formData.name} (${formData.email})`);
+      setFormData({ name: '', email: '', phone: '' });
+    }
+  };
+
+  const updateField = (field: keyof FormData, value: string): void => {
+    setFormData(prev => ({ ...prev, [field]: value }));
+    // Wyczyść błąd przy edycji
+    if (errors[field]) {
+      setErrors(prev => ({ ...prev, [field]: undefined }));
+    }
   };
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.label}>Imię:</Text>
-      <TextInput
-        style={styles.input}
-        value={formData.name}
-        onChangeText={(text) => setFormData({ ...formData, name: text })}
-        placeholder="Wpisz imię"
-      />
+    <KeyboardAvoidingView
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      style={styles.container}
+    >
+      <View style={styles.form}>
+        <Text style={styles.title}>Formularz kontaktowy</Text>
 
-      <Text style={styles.label}>Email:</Text>
-      <TextInput
-        style={styles.input}
-        value={formData.email}
-        onChangeText={(text) => setFormData({ ...formData, email: text })}
-        placeholder="Wpisz email"
-        keyboardType="email-address"
-        autoCapitalize="none"
-      />
+        {/* Imię */}
+        <View style={styles.field}>
+          <Text style={styles.label}>Imię *</Text>
+          <TextInput
+            style={[styles.input, errors.name && styles.inputError]}
+            value={formData.name}
+            onChangeText={(text) => updateField('name', text)}
+            placeholder="Wpisz imię"
+            placeholderTextColor="#999"
+          />
+          {errors.name && <Text style={styles.error}>{errors.name}</Text>}
+        </View>
 
-      <Button title="Wyślij" onPress={handleSubmit} />
+        {/* Email */}
+        <View style={styles.field}>
+          <Text style={styles.label}>Email *</Text>
+          <TextInput
+            style={[styles.input, errors.email && styles.inputError]}
+            value={formData.email}
+            onChangeText={(text) => updateField('email', text)}
+            placeholder="Wpisz email"
+            keyboardType="email-address"
+            autoCapitalize="none"
+            autoCorrect={false}
+            placeholderTextColor="#999"
+          />
+          {errors.email && <Text style={styles.error}>{errors.email}</Text>}
+        </View>
 
-      {submitted && (
-        <Text style={styles.success}>
-          Wysłano: {formData.name} ({formData.email})
-        </Text>
-      )}
-    </View>
+        {/* Telefon */}
+        <View style={styles.field}>
+          <Text style={styles.label}>Telefon</Text>
+          <TextInput
+            style={styles.input}
+            value={formData.phone}
+            onChangeText={(text) => updateField('phone', text)}
+            placeholder="Wpisz telefon"
+            keyboardType="phone-pad"
+            placeholderTextColor="#999"
+          />
+        </View>
+
+        {/* Submit */}
+        <TouchableOpacity style={styles.button} onPress={handleSubmit}>
+          <Text style={styles.buttonText}>Wyślij</Text>
+        </TouchableOpacity>
+      </View>
+    </KeyboardAvoidingView>
   );
 };
 
 const styles = StyleSheet.create({
-  container: {
-    padding: 20,
-  },
-  label: {
-    fontSize: 16,
-    fontWeight: '500',
-    marginBottom: 8,
-  },
+  container: { flex: 1 },
+  form: { padding: 20 },
+  title: { fontSize: 24, fontWeight: 'bold', marginBottom: 24, color: '#333' },
+  field: { marginBottom: 16 },
+  label: { fontSize: 14, fontWeight: '600', marginBottom: 8, color: '#333' },
   input: {
     borderWidth: 1,
     borderColor: '#ddd',
     padding: 12,
     borderRadius: 8,
-    marginBottom: 16,
     fontSize: 16,
+    backgroundColor: '#fff',
+    color: '#333',
   },
-  success: {
-    marginTop: 16,
-    color: 'green',
-    fontSize: 14,
+  inputError: { borderColor: '#FF3B30', borderWidth: 2 },
+  error: { color: '#FF3B30', fontSize: 12, marginTop: 4 },
+  button: {
+    backgroundColor: '#007AFF',
+    padding: 16,
+    borderRadius: 8,
+    alignItems: 'center',
+    marginTop: 8,
   },
+  buttonText: { color: '#fff', fontSize: 16, fontWeight: '600' },
 });
 
 export default SimpleForm;
@@ -548,69 +761,61 @@ export default SimpleForm;
 
 ### 6.1. Instalacja React Navigation
 
+**SCRIPT dla prowadzącego:**
+
+> „React Navigation to de facto standard do nawigacji w React Native. Ma kilka typów nawigatorów: Stack (ekrany nakładane), Tab (dolne zakładki), Drawer (menu wysuwane). Zaczynamy od Stack."
+
 **Krok 1: Zainstaluj główne pakiety**
+
 ```bash
-pnpm add @react-navigation/native
-pnpm add @react-navigation/native-stack
+pnpm add @react-navigation/native @react-navigation/native-stack
 ```
 
 **Krok 2: Zainstaluj zależności natywne**
+
 ```bash
 pnpm add react-native-screens react-native-safe-area-context
 ```
 
 **Krok 3: Android - konfiguracja natywna**
 
-Edytuj `android/app/src/main/java/com/solutionordersmobile/MainActivity.java` (lub `.kt` dla Kotlin):
+Edytuj `android/app/src/main/java/com/solutionordersmobile/MainActivity.kt`:
 
-```java
-package com.solutionordersmobile;
+```kotlin
+package com.solutionordersmobile
 
-import android.os.Bundle;
-import com.facebook.react.ReactActivity;
-import com.facebook.react.ReactActivityDelegate;
-import com.facebook.react.defaults.DefaultNewArchitectureEntryPoint;
-import com.facebook.react.defaults.DefaultReactActivityDelegate;
+import android.os.Bundle
+import com.facebook.react.ReactActivity
+import com.facebook.react.ReactActivityDelegate
+import com.facebook.react.defaults.DefaultNewArchitectureEntryPoint.fabricEnabled
+import com.facebook.react.defaults.DefaultReactActivityDelegate
 
-public class MainActivity extends ReactActivity {
+class MainActivity : ReactActivity() {
 
-  @Override
-  protected String getMainComponentName() {
-    return "SolutionOrdersMobile";
+  override fun getMainComponentName(): String = "SolutionOrdersMobile"
+
+  override fun onCreate(savedInstanceState: Bundle?) {
+    super.onCreate(null)  // WAŻNE: null zamiast savedInstanceState
   }
 
-  @Override
-  protected void onCreate(Bundle savedInstanceState) {
-    super.onCreate(null);  // WAŻNE: null zamiast savedInstanceState
-  }
-
-  @Override
-  protected ReactActivityDelegate createReactActivityDelegate() {
-    return new DefaultReactActivityDelegate(
-        this,
-        getMainComponentName(),
-        DefaultNewArchitectureEntryPoint.getFabricEnabled());
-  }
+  override fun createReactActivityDelegate(): ReactActivityDelegate =
+      DefaultReactActivityDelegate(this, mainComponentName, fabricEnabled)
 }
 ```
 
 **Krok 4: iOS - instalacja podów (tylko Mac)**
+
 ```bash
-cd ios
-pod install
-cd ..
+cd ios && pod install && cd ..
 ```
 
 **Krok 5: Rebuild aplikacji**
-```bash
-# Android
-pnpm react-native run-android
 
-# iOS (tylko Mac)
-pnpm react-native run-ios
+```bash
+pnpm react-native run-android
 ```
 
-**⚠️ WAŻNE:** Po instalacji natywnych pakietów ZAWSZE trzeba przebudować aplikację (nie wystarczy Hot Reload)!
+**⚠️ WAŻNE:** Po instalacji natywnych pakietów ZAWSZE trzeba przebudować aplikację!
 
 ### 6.2. Typy dla Nawigacji
 
@@ -632,7 +837,6 @@ export type RootStackParamList = {
 import React from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 
 import HomeScreen from '../screens/HomeScreen';
 import DetailsScreen from '../screens/DetailsScreen';
@@ -651,13 +855,13 @@ function RootNavigator(): React.JSX.Element {
           headerTitleStyle: { fontWeight: 'bold' },
         }}
       >
-        <Stack.Screen 
-          name="Home" 
+        <Stack.Screen
+          name="Home"
           component={HomeScreen}
           options={{ title: 'Strona Główna' }}
         />
-        <Stack.Screen 
-          name="Details" 
+        <Stack.Screen
+          name="Details"
           component={DetailsScreen}
           options={{ title: 'Szczegóły' }}
         />
@@ -675,7 +879,7 @@ export default RootNavigator;
 
 ```tsx
 import React from 'react';
-import { View, Text, Button, StyleSheet } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../navigation/types';
 
@@ -692,23 +896,21 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Ekran Główny</Text>
-      <Button title="Zobacz szczegóły" onPress={goToDetails} />
+      <Text style={styles.subtitle}>Witaj w aplikacji!</Text>
+
+      <TouchableOpacity style={styles.button} onPress={goToDetails}>
+        <Text style={styles.buttonText}>Zobacz szczegóły produktu</Text>
+      </TouchableOpacity>
     </View>
   );
 };
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: 20,
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    marginBottom: 20,
-  },
+  container: { flex: 1, justifyContent: 'center', alignItems: 'center', padding: 20 },
+  title: { fontSize: 28, fontWeight: 'bold', marginBottom: 8, color: '#333' },
+  subtitle: { fontSize: 16, color: '#666', marginBottom: 32 },
+  button: { backgroundColor: '#007AFF', paddingHorizontal: 24, paddingVertical: 12, borderRadius: 8 },
+  buttonText: { color: '#fff', fontSize: 16, fontWeight: '600' },
 });
 
 export default HomeScreen;
@@ -720,39 +922,46 @@ export default HomeScreen;
 
 ```tsx
 import React from 'react';
-import { View, Text, Button, StyleSheet } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../navigation/types';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Details'>;
 
 const DetailsScreen: React.FC<Props> = ({ route, navigation }) => {
+  // Typowane parametry z route
   const { itemId, itemName } = route.params;
 
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Szczegóły Produktu</Text>
-      <Text style={styles.info}>ID: {itemId}</Text>
-      <Text style={styles.info}>Nazwa: {itemName}</Text>
-      <Button title="Wróć" onPress={() => navigation.goBack()} />
+
+      <View style={styles.card}>
+        <Text style={styles.label}>ID:</Text>
+        <Text style={styles.value}>{itemId}</Text>
+
+        <Text style={styles.label}>Nazwa:</Text>
+        <Text style={styles.value}>{itemName}</Text>
+      </View>
+
+      <TouchableOpacity
+        style={styles.button}
+        onPress={() => navigation.goBack()}
+      >
+        <Text style={styles.buttonText}>← Wróć</Text>
+      </TouchableOpacity>
     </View>
   );
 };
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    padding: 20,
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    marginBottom: 20,
-  },
-  info: {
-    fontSize: 16,
-    marginBottom: 10,
-  },
+  container: { flex: 1, padding: 20 },
+  title: { fontSize: 24, fontWeight: 'bold', marginBottom: 20, color: '#333' },
+  card: { backgroundColor: '#fff', padding: 16, borderRadius: 8, marginBottom: 20 },
+  label: { fontSize: 12, color: '#999', marginTop: 8 },
+  value: { fontSize: 18, color: '#333', fontWeight: '500' },
+  button: { backgroundColor: '#f0f0f0', padding: 12, borderRadius: 8, alignItems: 'center' },
+  buttonText: { color: '#007AFF', fontSize: 16, fontWeight: '600' },
 });
 
 export default DetailsScreen;
@@ -777,6 +986,10 @@ export default App;
 
 ### 7.1. Podstawy useEffect
 
+**SCRIPT dla prowadzącego:**
+
+> „useEffect to odpowiednik componentDidMount, componentDidUpdate i componentWillUnmount w klasowych komponentach. Drugi argument (tablica zależności) kontroluje kiedy się wykonuje."
+
 ```tsx
 import React, { useState, useEffect } from 'react';
 import { View, Text, ActivityIndicator } from 'react-native';
@@ -790,19 +1003,20 @@ const DataLoader: React.FC = () => {
     console.log('Component mounted');
 
     // Symulacja ładowania danych
-    setTimeout(() => {
+    const timer = setTimeout(() => {
       setData('Dane załadowane!');
       setLoading(false);
     }, 2000);
 
-    // Cleanup function (opcjonalnie)
+    // Cleanup function
     return () => {
       console.log('Component unmounted');
+      clearTimeout(timer);
     };
   }, []); // [] = wykonaj raz na starcie
 
   if (loading) {
-    return <ActivityIndicator size="large" />;
+    return <ActivityIndicator size="large" color="#007AFF" />;
   }
 
   return <Text>{data}</Text>;
@@ -813,10 +1027,18 @@ const DataLoader: React.FC = () => {
 
 ```tsx
 const [count, setCount] = useState<number>(0);
+const [message, setMessage] = useState<string>('');
 
+// Wykonaj gdy count się zmieni
 useEffect(() => {
+  setMessage(`Licznik: ${count}`);
   console.log(`Count changed to: ${count}`);
-}, [count]); // Wykonaj gdy count się zmieni
+}, [count]);
+
+// Wykonaj przy każdym renderze (bez tablicy)
+useEffect(() => {
+  console.log('Rendered');
+});
 ```
 
 ---
@@ -834,9 +1056,26 @@ Rozszerz Counter o historię zmian (lista poprzednich wartości).
 
 ---
 
+## 🔍 Pytania Kontrolne
+
+1. Czym różni się `View` od `div` w React?
+2. Dlaczego używamy `StyleSheet.create()` zamiast inline styles?
+3. Jak działa `flex: 1` w React Native?
+4. Co to jest FlatList i dlaczego jest lepsza od map()?
+5. Jak przekazujemy parametry między ekranami w React Navigation?
+6. Kiedy wykonuje się useEffect z pustą tablicą zależności `[]`?
+
+---
+
 ## ➡️ Następna Lekcja
 
-**[Lekcja 3: .NET Backend - CQRS Setup](./lekcja-03-dotnet-cqrs.md)**
+**[Lekcja 3: .NET Backend – CQRS Setup](./lekcja-03-dotnet-cqrs.md)**
+
+W następnej lekcji:
+- Vertical Slice Architecture
+- MediatR i CQRS pattern
+- Entity Framework Core
+- Pierwszy Query i Command
 
 ---
 

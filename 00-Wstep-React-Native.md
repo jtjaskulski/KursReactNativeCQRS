@@ -1,124 +1,149 @@
 # WSTĘP: Czym jest React Native? Architektura i Historia
 
-## 🎯 W Tej Sekcji Nauczysz Się
-
-- ✅ Historii React Native (2015-2025)
-- ✅ Architektury React Native
-- ✅ Jak działa transpilacja TS → JS → Native
-- ✅ Porównania z Flutter, Xamarin, itp.
-- ✅ Najnowszych trendów (New Architecture, Expo)
+**Moduł:** Wprowadzenie do React Native  
+**Czas trwania:** 2 godziny  
+**Poziom:** Początkujący
 
 ---
 
-## CZĘŚĆ 1: Czym Jest React Native i Jego Historia
+## 🎯 Cele Lekcji
+
+Po ukończeniu tej lekcji będziesz potrafić:
+- ✅ Wyjaśnić historię i ewolucję React Native (2015-2025)
+- ✅ Opisać architekturę React Native (Bridge, Hermes, JSI)
+- ✅ Zrozumieć proces transpilacji TypeScript → JavaScript → Native
+- ✅ Porównać React Native z Flutter, Xamarin i innymi frameworkami
+- ✅ Rozpoznać najnowsze trendy (New Architecture, Expo)
+- ✅ Skonfigurować środowisko deweloperskie
+
+---
+
+## CZĘŚĆ 1: Czym Jest React Native i Jego Historia (30 minut)
 
 ### 1.1. Historia React Native (2015-2025)
 
-**React Native** został stworzony przez **Facebook** (Meta) w 2015 roku.
+**SCRIPT dla prowadzącego:**
+
+> „Dzień dobry! Dziś zaczynamy naszą podróż po React Native – frameworku, który pozwoli nam pisać aplikacje mobilne w JavaScripcie. Zamiast uczyć się Kotlina na Androida i Swifta na iOS-ie, my będziemy pisać JEDEN kod w JavaScripcie, a React Native przetłumaczy go na natywne komponenty dla obu platform."
+
+**React Native** został stworzony przez **Facebook** (Meta) w 2015 roku jako odpowiedź na rosnące koszty utrzymania dwóch osobnych zespołów mobilnych.
 
 **Problem, który rozwiązywał:**
-W tamtym czasie:
-- iOS aplikacje pisało się w Objective-C
-- Android aplikacje pisało się w Java
-- Duplikacja kodu między platformami
-- Różne zespoły = drożej, wolniej
+
+W 2015 roku tworzenie aplikacji mobilnych wyglądało tak:
+- iOS aplikacje pisało się w Objective-C (później Swift)
+- Android aplikacje pisało się w Java (później Kotlin)
+- Ten sam feature = 2x więcej kodu, 2x więcej bugów
+- Różne zespoły = droższa komunikacja, wolniejszy development
+- Różne UI/UX między platformami
 
 **Rozwiązanie - React Native:**
-- "Learn once, write anywhere"
+- Filozofia: "Learn once, write anywhere"
 - Jeden kod JavaScript → iOS + Android
-- Reuse komponentów, logiki biznesowej
-- Szybszy development cycle
+- Reuse komponentów, logiki biznesowej, stylów
+- Szybszy development cycle dzięki Hot Reload
+- Dostęp do natywnych API urządzenia
 
 **Ewolucja wersji (2015-2025):**
+
 ```
-2015: Początek (v0.1)
-2016-2018: Stabilizacja (React Native 0.40+)
-2020: Rebranding (nowa dokumentacja)
-2023: New Architecture (próba modernizacji)
-2024-2025: Hermes 0.15+ jako domyślny engine
+┌──────────────────────────────────────────────────────────────┐
+│                    TIMELINE REACT NATIVE                      │
+├──────────────────────────────────────────────────────────────┤
+│  2015 │ Początek (v0.1) - pierwsza wersja open source        │
+│  2016 │ Stabilizacja - React Native 0.40+                    │
+│  2018 │ Re-architektura rozpoczęta (Fabric, TurboModules)    │
+│  2019 │ Hermes wprowadzony jako opcjonalny engine            │
+│  2020 │ Nowa dokumentacja, rebranding                        │
+│  2022 │ New Architecture dostępna eksperymentalnie           │
+│  2023 │ New Architecture stabilna                            │
+│  2024 │ Hermes domyślny engine, React Native 0.73+           │
+│  2025 │ React Native 0.82+ - pełna dojrzałość                │
+└──────────────────────────────────────────────────────────────┘
 ```
 
-**Porównanie: 2015 vs 2025**
+### 1.2. Porównanie: Setup 2015 vs 2025
 
-**Setup w 2015 - Pierwsza Wersja RN:**
+**❌ Setup w 2015 - Pierwsza Wersja RN:**
 
 ```bash
-# Krok 1: Zainstaluj Node
-brew install node
-
+# Krok 1: Zainstaluj Node (ręcznie z instalatora)
 # Krok 2: Zainstaluj React Native CLI
 npm install -g react-native
 
-# Krok 3: Utwórz projekt
+# Krok 3: Utwórz projekt (tylko JavaScript!)
 react-native init MyApp
 
 # Krok 4: Setup Android Studio (ręcznie)
-# Pobierz, zainstaluj, konfiguruj PATH...
-# PAIN!
+# - Pobierz Android Studio (~2GB)
+# - Zainstaluj SDK Manager
+# - Skonfiguruj ANDROID_HOME
+# - Dodaj do PATH
+# - PAIN! Wiele błędów konfiguracji
 
-# Krok 5: Uruchom
+# Krok 5: Uruchom (często nie działało za pierwszym razem)
 react-native run-android
 ```
 
 **Problemy w 2015:**
-- ❌ Brak TypeScript
-- ❌ Ręczna konfiguracja Android
-- ❌ Słabe IDE support
-- ❌ Wolne compilation
+- ❌ Brak TypeScript (tylko JavaScript)
+- ❌ Ręczna konfiguracja Android/iOS
+- ❌ Słabe wsparcie IDE
+- ❌ Wolna kompilacja (kilka minut)
+- ❌ Częste "Red Screen of Death"
+- ❌ Brak Hot Reload (tylko Live Reload)
 
-**Setup w 2025 - Nowoczesny Sposób:**
+**✅ Setup w 2025 - Nowoczesny Sposób:**
 
 ```bash
-# Krok 1: Node już zainstalowany
-node --version  # v18+
+# Krok 1: Node już zainstalowany (przez nvm/winget)
+node --version  # v20+ lub v18 LTS
 
-# Krok 2: pnpm zamiast npm
+# Krok 2: pnpm zamiast npm (szybszy, wydajniejszy)
 npm install -g pnpm
 
-# Krok 3: CLI init (auto-detect Android)
+# Krok 3: Utwórz projekt (TypeScript domyślnie!)
 npx @react-native-community/cli init SolutionOrdersMobile
 
-# Krok 4: TypeScript ready! ✅
-# - Wszystkie pliki to .tsx
-# - tsconfig.json na miejscu
-
-# Krok 5: pnpm install (szybciej!)
+# Krok 4: Konfiguracja pnpm dla RN
+echo "node-linker=hoisted" > .npmrc
 pnpm install
 
-# Krok 6: Run
+# Krok 5: Run (Android Studio auto-detected!)
 pnpm react-native run-android
 ```
 
 **Ulepszenia w 2025:**
-- ✅ TypeScript built-in
-- ✅ Szybki setup (5 minut)
-- ✅ Auto-detect Android location
-- ✅ Hermes by default
-- ✅ Hot reload lightning fast
-- ✅ Excellent IDE support
+- ✅ TypeScript wbudowany od startu
+- ✅ Szybki setup (5-10 minut)
+- ✅ Auto-detect Android SDK location
+- ✅ Hermes engine domyślnie (szybszy startup)
+- ✅ Fast Refresh (Hot Reload 2.0)
+- ✅ Doskonałe wsparcie IDE (VS Code, IntelliJ)
+- ✅ Lepsza dokumentacja i community
 
-### 1.2. React Native Dzisiaj (2025)
+### 1.3. React Native Dzisiaj (2025)
 
-**React Native w 2025:**
-- ✅ Używany przez 30% mobilnych aplikacji
-- ✅ Wsparcie dla najnowszych iOS/Android
-- ✅ Integracja z TypeScript na starcie
-- ✅ Expo dla szybkich prototypów
-- ✅ New Architecture dla lepszej wydajności
+**Statystyki i adopcja:**
+- ✅ Używany przez ~30% aplikacji mobilnych (wg Statista)
+- ✅ 2 miliony+ aktywnych projektów na GitHub
+- ✅ Top 10 najczęściej używanych frameworków
+- ✅ Wsparcie dla najnowszych iOS 17+ / Android 14+
+- ✅ Pełna integracja z TypeScript
 
-**Versioning React Native (2025):**
+**Wersjonowanie React Native (2025):**
 
 ```
-React Native 0.82.x (LTS)   ← CURRENT (Nov 2025)
-React Native 0.81.x         ← Previous
-React Native 0.80.x         ← Stable
-React Native 0.79.x         ← Old
+React Native 0.82.x (CURRENT)  ← Używamy w tym kursie
+React Native 0.81.x            ← Previous stable
+React Native 0.80.x            ← Still supported
+React Native 0.79.x            ← Legacy
 ```
 
 **Strategia wersjonowania:**
-- Nowa minor wersja ~co 2 miesiące
-- Patch releases co tydzień
-- Long-Term Support (LTS) wersje
+- Nowa minor wersja co ~8 tygodni
+- Patch releases co tydzień (bug fixes)
+- Breaking changes dokumentowane w CHANGELOG
 
 **Wersje używane w tym kursie:**
 
@@ -132,618 +157,680 @@ React Native 0.79.x         ← Old
   },
   "devDependencies": {
     "typescript": "^5.3.3",
-    "@types/react-native": "^0.82.0",
+    "@types/react": "^18.3.0",
     "@react-native-community/cli": "^13.6.7"
   }
 }
 ```
 
-**Upewnij się że twój `package.json` ma te wersje!**
-
 ---
 
-## CZĘŚĆ 2: Architektura React Native
+## CZĘŚĆ 2: Architektura React Native (40 minut)
 
 ### 2.1. Jak Działa React Native - Podstawy
 
-**SCRIPT dla studentów:**
+**SCRIPT dla prowadzącego:**
 
-> „Dzień dobry! Dziś zaczynamy naszą 10-godzinną podróż po React Native – frameworku, który pozwoli nam pisać aplikacje mobilne w JavaScripcie. Zamiast uczyć się Kotlina na Androida i Swifta na iOS-ie, my będziemy pisać JEDEN kod w JavaScripcie, a React Native „przetłumaczy" go na natywne komponenty dla obu platform."
+> „React Native to NIE jest WebView jak Cordova czy PhoneGap. To prawdziwe natywne komponenty! Gdy piszesz `<View>`, React Native tworzy prawdziwy `UIView` na iOS i `android.view.View` na Androidzie. Dlatego aplikacje RN są szybkie i wyglądają natywnie."
 
-**Wyjaśnienie koncepcji:**
+**Kluczowe koncepcje:**
 
-React Native to biblioteka stworzona przez Facebook (Meta) pozwalająca budować natywne aplikacje mobilne dla Androida i iOS-a za pomocą JavaScriptu. Pod spodem React Native używa **React Bridgea** – mostu komunikacyjnego między kodem JavaScript a kodem natywnym (Java, Kotlin na Androidzie; Swift, Objective-C na iOS-ie).
+| Koncept | Opis |
+|---------|------|
+| **Natywne komponenty** | `<View>`, `<Text>` → prawdziwe natywne widoki |
+| **JavaScript Engine** | Hermes/JSC uruchamia Twój kod JS |
+| **Bridge/JSI** | Komunikacja między JS a natywnym kodem |
+| **Metro Bundler** | Pakuje JS do aplikacji (jak Webpack) |
 
 **Diagram - Warstwy React Native:**
 
 ```
-┌─────────────────────────────────────────────┐
-│        Aplikacja (TypeScript/React)         │
-│  - Komponenty (Button, Text, View)          │
-│  - Logika biznesowa                         │
-│  - State management                         │
-└────────────────┬────────────────────────────┘
-                 │
-         React Native Bridge
-         (komunikacja JS ↔ Native)
-                 │
-    ┌────────────┴────────────┐
-    ↓                         ↓
-┌────────────┐          ┌─────────────┐
-│  iOS App   │          │ Android App │
-│  (Swift)   │          │  (Kotlin)   │
-└────────────┘          └─────────────┘
-    ↓                         ↓
-┌────────────┐          ┌─────────────┐
-│  UIView    │          │  View       │
-│  Foundation│          │  Activity   │
-└────────────┘          └─────────────┘
-    ↓                         ↓
-┌────────────────────────────────────────┐
-│      iOS/Android System Libraries      │
-└────────────────────────────────────────┘
+┌─────────────────────────────────────────────────────────────┐
+│                 TWOJA APLIKACJA                              │
+│  ┌───────────────────────────────────────────────────────┐  │
+│  │            TypeScript / JavaScript                     │  │
+│  │  - Komponenty React (View, Text, Button)              │  │
+│  │  - Logika biznesowa                                   │  │
+│  │  - State management (Context, Redux, Zustand)         │  │
+│  │  - Stylowanie (StyleSheet)                            │  │
+│  └───────────────────────────────────────────────────────┘  │
+│                           │                                  │
+│                    ┌──────▼──────┐                          │
+│                    │   HERMES    │  JavaScript Engine        │
+│                    │   (lub JSC) │  Uruchamia JS             │
+│                    └──────┬──────┘                          │
+│                           │                                  │
+│              ┌────────────▼────────────┐                    │
+│              │  JSI / BRIDGE / FABRIC  │                    │
+│              │  Komunikacja JS ↔ Native │                    │
+│              └────────────┬────────────┘                    │
+│                           │                                  │
+│         ┌─────────────────┴─────────────────┐               │
+│         ↓                                   ↓               │
+│  ┌─────────────────┐               ┌─────────────────┐      │
+│  │   iOS Native    │               │  Android Native │      │
+│  │  Swift / ObjC   │               │  Kotlin / Java  │      │
+│  │  UIKit, SwiftUI │               │  Android SDK    │      │
+│  └────────┬────────┘               └────────┬────────┘      │
+│           │                                 │               │
+│           ↓                                 ↓               │
+│  ┌─────────────────┐               ┌─────────────────┐      │
+│  │   iOS System    │               │ Android System  │      │
+│  │  (iPhone/iPad)  │               │ (Pixel, Samsung)│      │
+│  └─────────────────┘               └─────────────────┘      │
+└─────────────────────────────────────────────────────────────┘
 ```
 
-**Kluczowe punkty:**
-- React Native NIE to WebView (jak Cordova) – to prawdziwe komponenty natywne
-- Jeden kod JavaScript = dwie platformy (Android + iOS)
-- Hot Reload – zmian widać od razu bez rebuild'u
-- Dostęp do hardware'u urządzenia (kamera, GPS, itd.)
+**Wyjaśnienie każdej warstwy:**
+
+1. **Twój kod TS/JS** - tutaj piszesz komponenty, logikę, style
+2. **Hermes** - silnik JavaScript, uruchamia Twój kod
+3. **JSI/Bridge** - tłumaczy wywołania JS na natywne metody
+4. **Native Layer** - prawdziwy kod iOS/Android
+5. **System** - urządzenie użytkownika
 
 ### 2.2. JavaScript Engine - Hermes
 
-W React Native do uruchomienia kodu JavaScript używamy silnika JS:
+**Czym jest JavaScript Engine?**
 
-**Opcje:**
-1. **Hermes** (2025 - domyślny) ⭐
-   - Stworzony przez Meta
-   - Lekki (mniej RAM)
-   - Szybszy startup
-   - Wbudowany debugger
+JavaScript Engine to program który uruchamia kod JavaScript. Przeglądarka Chrome używa V8, Safari używa JavaScriptCore, a React Native używa **Hermes**.
 
-2. **JavaScriptCore** (iOS)
-   - Natywny dla iOS
-   - Wydajny
+**Dostępne opcje:**
 
-3. **V8** (Android - rzadko)
-   - Ciężki
-   - Wolniejszy
+| Engine | Platforma | Charakterystyka |
+|--------|-----------|-----------------|
+| **Hermes** ⭐ | Android + iOS | Domyślny w RN 0.70+, stworzony przez Meta |
+| **JavaScriptCore** | iOS | Natywny engine Apple |
+| **V8** | Android | Engine Chrome'a (rzadko używany w RN) |
 
-**W kursie używamy: Hermes** (domyślnie w React Native 0.82+)
-
-**Włączanie Hermes w projekcie:**
-```bash
-# android/app/build.gradle
-enableHermes = true;  # domyślnie true w RN 0.82+!
-```
-
-**Korzyści Hermes:**
-- 10-20% szybszy startup
-- 30% mniej RAM
-- Szybszy first render
-
-### 2.3. Bridge - Łącznik JS ↔ Native
-
-**Jak działa komunikacja:**
+**Dlaczego Hermes jest lepszy?**
 
 ```
-JavaScript Engine
-        │
-        │ (Binary data)
-        ↓
-    BRIDGE
-        │
-        │ (Native methods)
-        ↓
-Native Modules
-(Android Java/Kotlin, iOS Swift)
+┌────────────────────────────────────────────────────────────┐
+│              PORÓWNANIE: Hermes vs JavaScriptCore           │
+├─────────────────────┬──────────────┬───────────────────────┤
+│      Metryka        │    Hermes    │   JavaScriptCore      │
+├─────────────────────┼──────────────┼───────────────────────┤
+│ Czas startu (TTI)   │    ~1.5s     │       ~2.5s           │
+│ Rozmiar APK         │    -10%      │      baseline         │
+│ Zużycie RAM         │    -30%      │      baseline         │
+│ Bytecode Precompile │      ✅       │         ❌            │
+│ Wbudowany Debugger  │      ✅       │    Chrome DevTools    │
+└─────────────────────┴──────────────┴───────────────────────┘
 ```
 
-**Przykład w praktyce:**
-```typescript
-// TS - pytamy o dane z kamery
-import ImagePicker from 'react-native-image-picker';
-launchCamera(...);
+**Włączanie Hermes (domyślne od RN 0.70+):**
 
-// Bridge konwertuje na natywny kod
-// Android: kód Java aktywuje kamerę
-// iOS: Swift UIImagePickerController
+```groovy
+// android/app/build.gradle
+android {
+    defaultConfig {
+        // Hermes jest domyślnie włączony
+    }
+}
 
-// Wynik wraca przez bridge
-// TS otrzymuje URI zdjęcia
+// Jeśli potrzebujesz wyłączyć (nie zalecane):
+project.ext.react = [
+    enableHermes: false
+]
 ```
 
-### 2.4. New Architecture (2024-2025)
+### 2.3. Bridge vs JSI - Stara i Nowa Architektura
 
-Nowa architektura React Native (0.73+):
-- ✅ Bezpośrednia komunikacja (bez Bridge)
-- ✅ Lepsze performance
-- ✅ Łatwiejsze integrowanie native code
-- ✅ Faster rendering
+**SCRIPT dla prowadzącego:**
+
+> „Przez lata React Native używał czegoś co nazywamy 'Bridge' - mostu między JavaScriptem a kodem natywnym. Problem? Każda komunikacja musiała być serializowana do JSON, przesłana przez most, i deserializowana po drugiej stronie. To było wolne. Nowa Architektura z JSI rozwiązuje ten problem."
+
+**Stara Architektura (Bridge):**
+
+```
+┌──────────────────┐          ┌──────────────────┐
+│   JavaScript     │          │     Native       │
+│                  │          │                  │
+│  callNative({    │ ──JSON─► │ deserialize()    │
+│    module: 'X',  │          │ call module X    │
+│    method: 'Y',  │ ◄─JSON── │ serialize result │
+│    args: [...]   │          │                  │
+│  })              │          │                  │
+└──────────────────┘          └──────────────────┘
+
+Problem: Każde wywołanie = serializacja JSON!
+- Wolne dla częstych operacji
+- Nie można dzielić pamięci
+- Asynchroniczne (opóźnienia w UI)
+```
+
+**Nowa Architektura (JSI - JavaScript Interface):**
+
+```
+┌──────────────────┐          ┌──────────────────┐
+│   JavaScript     │          │     Native       │
+│                  │          │                  │
+│  // Bezpośredni  │ ──────►  │ // Synchroniczne │
+│  // dostęp do    │          │ // wywołania     │
+│  // natywnych    │ ◄──────  │                  │
+│  // obiektów!    │          │                  │
+└──────────────────┘          └──────────────────┘
+
+Korzyści:
+✅ Bezpośrednie wywołania (bez JSON)
+✅ Synchroniczna komunikacja
+✅ Dzielenie pamięci między JS i Native
+✅ Szybsze renderowanie UI
+```
 
 **Komponenty New Architecture:**
-- **Fabric** - nowy renderer UI (synchroniczny)
-- **TurboModules** - lazy-load natywnych zależności
-- **JSI** (JavaScript Interface) - bezpośredni interfejs JS-native
 
-**Status (2025):** Stabilny, ale nie domyślny. Migracja w toku.
+| Komponent | Funkcja | Status 2025 |
+|-----------|---------|-------------|
+| **JSI** | JavaScript Interface - bezpośrednia komunikacja | ✅ Stabilny |
+| **Fabric** | Nowy renderer UI - synchroniczny | ✅ Stabilny |
+| **TurboModules** | Lazy-loading modułów natywnych | ✅ Stabilny |
+| **Codegen** | Generowanie typów z JS do Native | ✅ Stabilny |
 
-### 2.5. Podstawowe Komponenty React Native
+### 2.4. Podstawowe Komponenty React Native
 
-**SCRIPT:**
+**SCRIPT dla prowadzącego:**
 
-> „React Native ma strukturę podobną do Reacta web'owego, ale zamiast HTML komponentów (div, button), używamy komponentów mobilnych (View, Text, Button, TextInput). To są wrappery wokół natywnych komponentów."
+> „React Native ma strukturę podobną do Reacta webowego, ale zamiast elementów HTML używamy komponentów mobilnych. Zamiast `<div>` mamy `<View>`, zamiast `<p>` mamy `<Text>`. To są wrappery wokół prawdziwych natywnych komponentów."
 
 **Mapowanie React Web → React Native:**
 
 ```
-React Web              React Native
-─────────────          ────────────────
-<div>                  <View>
-<span>, <p>            <Text>
-<input>                <TextInput>
-<button>               <Button> / <Pressable>
-<img>                  <Image>
-<ul>, <li>             <FlatList>, <ScrollView>
+┌─────────────────────────────────────────────────────────┐
+│          REACT WEB              REACT NATIVE            │
+├─────────────────────────────────────────────────────────┤
+│  <div>                    →     <View>                  │
+│  <span>, <p>, <h1>        →     <Text>                  │
+│  <input type="text">      →     <TextInput>             │
+│  <button>                 →     <Button>, <Pressable>   │
+│  <img>                    →     <Image>                 │
+│  <ul>, <li>               →     <FlatList>, <ScrollView>│
+│  <a href="...">           →     <Pressable> + Linking   │
+│  <form>                   →     Nie istnieje (ręcznie)  │
+│  CSS classes              →     StyleSheet.create()     │
+│  onClick                  →     onPress                 │
+└─────────────────────────────────────────────────────────┘
 ```
 
-**Struktura komponentu React Native (przykład):**
+**Przykład prostego komponentu:**
 
-```javascript
+```tsx
 import React, { useState } from 'react';
-import { View, Text, Button } from 'react-native';
+import { View, Text, Button, StyleSheet } from 'react-native';
 
-function MyComponent() {
-  const [count, setCount] = useState(0);
+// Komponent funkcyjny z TypeScript
+function Counter(): React.JSX.Element {
+  // Hook useState - zarządzanie stanem
+  const [count, setCount] = useState<number>(0);
 
   return (
-    <View style={{ padding: 20 }}>
-      <Text style={{ fontSize: 18, marginBottom: 10 }}>
+    // View = kontener (jak <div>)
+    <View style={styles.container}>
+      {/* Text = tekst (WSZYSTKIE teksty muszą być w <Text>!) */}
+      <Text style={styles.countText}>
         Licznik: {count}
       </Text>
+      
+      {/* Button = przycisk natywny */}
       <Button 
-        title="Kliknij mnie" 
-        onPress={() => setCount(count + 1)} 
+        title="Zwiększ" 
+        onPress={() => setCount(count + 1)}  // onPress zamiast onClick!
       />
     </View>
   );
 }
 
-export default MyComponent;
+// StyleSheet = zoptymalizowane style (jak CSS)
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#f5f5f5',
+  },
+  countText: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    marginBottom: 20,
+    color: '#333',
+  },
+});
+
+export default Counter;
 ```
 
-**Wyjaśnienie kodu:**
-- `View` = kontener (jak `<div>`)
-- `Text` = tekst (wszystkie teksty muszą być w `<Text>`)
-- `useState` = hook do zarządzania stanem
-- `onPress` = zdarzenie kliknięcia (zamiast `onClick`)
-- `style` = obiekty JS (zamiast CSS)
+**Wyjaśnienie kluczowych różnic:**
 
-### 2.6. React Native Fundamentals - Core Concepts
+| Aspekt | React Web | React Native |
+|--------|-----------|--------------|
+| Kontener | `<div>` | `<View>` |
+| Tekst | Bezpośrednio w JSX | Musi być w `<Text>` |
+| Style | CSS classes/inline | `StyleSheet.create()` |
+| Zdarzenia | `onClick` | `onPress` |
+| Layout | CSS (Flexbox/Grid) | Flexbox (domyślny) |
+| Units | px, em, rem, % | Tylko liczby (dp) |
 
-**1. Components**
+### 2.5. Platform-Specific Code
+
+React Native pozwala pisać kod specyficzny dla platformy:
+
+**Sposób 1: Platform.OS**
 ```tsx
-const MyComponent: React.FC = () => {
-  return <Text>Hello</Text>;
-};
-```
+import { Platform, Text } from 'react-native';
 
-**2. State & Props**
-```tsx
-const [count, setCount] = useState(0);
-<Button title={count.toString()} />
-```
-
-**3. Native Modules**
-```tsx
-import { Vibration } from 'react-native';
-Vibration.vibrate(100);
-```
-
-**4. Platform-Specific Code**
-```tsx
-import { Platform } from 'react-native';
-
-if (Platform.OS === 'android') {
-  // Android code
-} else if (Platform.OS === 'ios') {
-  // iOS code
+function PlatformExample() {
+  return (
+    <Text>
+      {Platform.OS === 'android' 
+        ? 'Witaj Android!' 
+        : 'Witaj iOS!'}
+    </Text>
+  );
 }
 ```
 
-**5. Event Loop & Async**
+**Sposób 2: Platform.select()**
+```tsx
+import { Platform, StyleSheet } from 'react-native';
 
-```typescript
-// TS/JS Event Loop w React Native
+const styles = StyleSheet.create({
+  container: {
+    padding: Platform.select({
+      ios: 20,
+      android: 16,
+      default: 12,
+    }),
+    // Shadow - różny na iOS i Android
+    ...Platform.select({
+      ios: {
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.25,
+        shadowRadius: 4,
+      },
+      android: {
+        elevation: 4,
+      },
+    }),
+  },
+});
+```
 
-// Synchroniczny kod - blokuje UI
-function slowSync() {
-  for (let i = 0; i < 1000000000; i++) { }
-}
-
-// Asynchroniczny - nie blokuje
-async function fetchData() {
-  const data = await fetch('/api');
-  return data;
-}
-
-// setTimeout - za iteracją event loop
-setTimeout(() => {
-  console.log('After other tasks');
-}, 0);
+**Sposób 3: Osobne pliki (.ios.tsx / .android.tsx)**
+```
+components/
+├── Button.ios.tsx      ← iOS wersja
+├── Button.android.tsx  ← Android wersja
+└── Button.tsx          ← Fallback
 ```
 
 ---
 
-## CZĘŚĆ 3: React Native vs Konkurencja
+## CZĘŚĆ 3: React Native vs Konkurencja (20 minut)
 
-### 3.1. Porównanie Frameworków
+### 3.1. Porównanie Frameworków Cross-Platform
 
-| Aspekt | React Native | Flutter | Xamarin | Ionic |
-|--------|-------------|---------|---------|-------|
-| **Język** | JavaScript/TS | Dart | C# | HTML/TS |
-| **Wydajność** | Bardzo dobra | Najlepsza | Dobra | Średnia |
-| **Łatwość** | Łatwe (JS) | Średnie (Dart) | Średnie (C#) | Łatwe (Web) |
-| **Ekosystem** | Ogromny | Rosnący | Zmniejszający | Mature |
-| **Popularne Apps** | Facebook, Instagram, Discord | Google Ads, eBay, Alibaba | Microsoft apps | Wikimedia |
-| **Hot Reload** | ✅ Tak | ✅ Tak | ❌ Nie | ✅ Tak |
-| **Native Feel** | ✅ Doskonale | ✅ Doskonale | ✅ Doskonale | ❌ Słabiej |
+```
+┌────────────────────────────────────────────────────────────────────────────┐
+│                    PORÓWNANIE FRAMEWORKÓW MOBILNYCH                         │
+├──────────────┬──────────────┬──────────────┬──────────────┬────────────────┤
+│   Aspekt     │ React Native │   Flutter    │   Xamarin    │     Ionic      │
+├──────────────┼──────────────┼──────────────┼──────────────┼────────────────┤
+│ Język        │ JavaScript   │    Dart      │     C#       │  HTML/CSS/TS   │
+│              │ TypeScript   │              │              │                │
+├──────────────┼──────────────┼──────────────┼──────────────┼────────────────┤
+│ Wydajność    │ ⭐⭐⭐⭐      │  ⭐⭐⭐⭐⭐    │   ⭐⭐⭐⭐     │    ⭐⭐⭐        │
+├──────────────┼──────────────┼──────────────┼──────────────┼────────────────┤
+│ Łatwość      │ ⭐⭐⭐⭐⭐     │   ⭐⭐⭐⭐     │   ⭐⭐⭐      │   ⭐⭐⭐⭐⭐     │
+│ nauki        │ (znasz JS)   │ (nowy język) │  (znasz C#)  │  (znasz web)   │
+├──────────────┼──────────────┼──────────────┼──────────────┼────────────────┤
+│ Ekosystem    │  Ogromny     │   Rosnący    │ Zmniejszający│    Mature      │
+├──────────────┼──────────────┼──────────────┼──────────────┼────────────────┤
+│ Hot Reload   │     ✅        │      ✅       │      ❌       │       ✅        │
+├──────────────┼──────────────┼──────────────┼──────────────┼────────────────┤
+│ Native Feel  │  Doskonale   │  Doskonale   │  Doskonale   │    Średnio     │
+│              │ (natywne UI) │ (własne UI)  │ (natywne UI) │   (WebView)    │
+├──────────────┼──────────────┼──────────────┼──────────────┼────────────────┤
+│ Znane apps   │ Instagram    │ Google Ads   │ Microsoft    │   Wikimedia    │
+│              │ Discord      │ eBay Motors  │ apps         │   MarketWatch  │
+│              │ Uber Eats    │ Alibaba      │              │                │
+└──────────────┴──────────────┴──────────────┴──────────────┴────────────────┘
+```
 
 ### 3.2. Dlaczego React Native w Tym Kursie?
 
-- ✅ JavaScript (znany większości frontend devów)
-- ✅ React ecosystem (React dev mają naturalnie)
-- ✅ Ogromna społeczność
-- ✅ Dużo bibliotek i narzędzi
-- ✅ Łatwo znaleźć specjalistów
-- ✅ High paying jobs
-- ✅ Wiele firm używa (Discord, Instagram, Uber Eats...)
+**Argumenty za React Native:**
+
+1. **JavaScript/TypeScript** 
+   - Najpopularniejszy język programowania
+   - Każdy frontend developer już go zna
+   - Łatwa ścieżka z web do mobile
+
+2. **React Ecosystem**
+   - React developers mają naturalny start
+   - Znane koncepcje: komponenty, hooks, state
+   - Duża ilość bibliotek
+
+3. **Community i wsparcie**
+   - 100k+ pytań na StackOverflow
+   - Aktywny Discord i GitHub
+   - Regularne aktualizacje od Meta
+
+4. **Rynek pracy**
+   - Wysoka płaca (senior: 25-45k PLN/mies.)
+   - Duży popyt (setki ofert w Polsce)
+   - Wiele dużych firm używa RN
+
+5. **Znane aplikacje**
+   - Facebook, Instagram, Messenger
+   - Discord, Pinterest
+   - Uber Eats, Shopify
+   - Coinbase, Bloomberg
 
 ---
 
-## CZĘŚĆ 4: Ecosystem React Native (2025)
+## CZĘŚĆ 4: Ecosystem React Native 2025 (15 minut)
 
 ### 4.1. Kluczowe Biblioteki
 
+**State Management:**
 ```
-State Management:
-  - Zustand (prosty)
-  - Redux Toolkit (complex)
-  - Jotai (atomic)
+┌────────────────────────────────────────────────────┐
+│  Zustand       │ Prosty, lekki          │ ⭐⭐⭐⭐⭐  │
+│  Redux Toolkit │ Złożone aplikacje      │ ⭐⭐⭐⭐   │
+│  Jotai         │ Atomic state           │ ⭐⭐⭐⭐   │
+│  MobX          │ Observable pattern     │ ⭐⭐⭐    │
+│  Context API   │ Built-in React         │ ⭐⭐⭐    │
+└────────────────────────────────────────────────────┘
+```
 
-Networking:
-  - fetch API (built-in)
-  - Axios
-  - React Query / TanStack Query
+**Networking:**
+```
+┌────────────────────────────────────────────────────┐
+│  fetch()       │ Built-in, wystarczający │ ⭐⭐⭐⭐  │
+│  Axios         │ Popularne, features      │ ⭐⭐⭐⭐  │
+│  TanStack Query│ Cache, mutations, stale  │ ⭐⭐⭐⭐⭐ │
+│  SWR           │ Stale-while-revalidate   │ ⭐⭐⭐⭐  │
+└────────────────────────────────────────────────────┘
+```
 
-UI Components:
-  - React Native Paper (Material)
-  - NativeBase
-  - Tamagui
+**UI Components:**
+```
+┌────────────────────────────────────────────────────┐
+│  React Native Paper │ Material Design    │ ⭐⭐⭐⭐⭐ │
+│  NativeBase         │ Customizable       │ ⭐⭐⭐⭐  │
+│  Tamagui            │ Fast, cross-plat   │ ⭐⭐⭐⭐  │
+│  Gluestack          │ Modern approach    │ ⭐⭐⭐⭐  │
+└────────────────────────────────────────────────────┘
+```
 
-Navigation:
-  - React Navigation (⭐ UŻYWAMY W KURSIE)
-  - React Native Navigation
-
-Testing:
-  - Jest (default)
-  - Detox (E2E)
-  - React Native Testing Library
+**Navigation:**
+```
+┌────────────────────────────────────────────────────┐
+│  React Navigation ⭐│ STANDARD, używamy   │ ⭐⭐⭐⭐⭐ │
+│  Expo Router        │ File-based routing  │ ⭐⭐⭐⭐  │
+│  React Native Nav   │ Wyman's alternative │ ⭐⭐⭐   │
+└────────────────────────────────────────────────────┘
 ```
 
 ### 4.2. Developer Tools
 
-```
-IDE:
-  - Visual Studio Code (FREE)
-  - Android Studio (FREE)
-  - Xcode (FREE, Mac only)
+**IDE i Edytory:**
+- **Visual Studio Code** (FREE) - najpopularniejszy
+- **Cursor** - AI-powered VS Code fork
+- **WebStorm** - pełne IDE (płatne)
 
-Debugging:
-  - Flipper (Desktop debugger)
-  - React Native Debugger
-  - Chrome DevTools
+**Debugging:**
+- **Flipper** - Desktop debugger od Meta
+- **React DevTools** - inspekcja komponentów
+- **Hermes Debugger** - debugging Hermes engine
+- **Chrome DevTools** - sieć, console
 
-Performance:
-  - Profiler (React)
-  - Hermes Debugger
-  - Android Profiler
-```
+**Performance:**
+- **React Native Performance** - wbudowane metryki
+- **Flashlight** - performance testing
+- **Android Profiler** - natywne metryki Android
 
 ---
 
-## CZĘŚĆ 5: Expo vs React Native CLI
+## CZĘŚĆ 5: Expo vs React Native CLI (10 minut)
 
-### 5.1. Expo (Alternatywa)
+### 5.1. Expo SDK
 
-**Expo SDK** - warstwa abstrakcji nad React Native:
+**Expo** to warstwa abstrakcji nad React Native:
 
 ```bash
-# Zamiast setup React Native
+# Utworzenie projektu Expo
 npx create-expo-app MyApp
 cd MyApp
 npx expo start
 ```
 
 **Zalety Expo:**
-- ✅ Szybki setup (5 minut)
-- ✅ Gotowe biblioteki (camera, location, etc.)
-- ✅ Cloud builds (EAS)
+- ✅ Setup w 2 minuty
+- ✅ Gotowe biblioteki (camera, location, notifications)
+- ✅ Cloud builds (EAS Build)
 - ✅ Over-the-air updates
+- ✅ Expo Go app - testowanie bez build
 
 **Wady Expo:**
-- ❌ Mniej kontroli
-- ❌ Nieco większy bundle
+- ❌ Mniej kontroli nad native code
+- ❌ Większy rozmiar bundle
 - ❌ Ograniczone custom native modules
+- ❌ Niektóre biblioteki nie działają
 
-### 5.2. React Native CLI (Bare Metal)
+### 5.2. React Native CLI (Bare)
 
-**W tym kursie używamy: Bare React Native CLI** (nie Expo)
+**W tym kursie używamy: React Native CLI (bez Expo)**
 
-**Dlaczego?**
+```bash
+# Utworzenie projektu bare RN
+npx @react-native-community/cli init SolutionOrdersMobile
+```
+
+**Dlaczego bare CLI?**
 - ✅ Pełna kontrola nad native code
 - ✅ Możliwość pisania custom native modules
 - ✅ Nauka internals React Native
-- ✅ Lepsze zrozumienie jak działa framework
-- ✅ Przygotowanie do pracy w enterprise projektach
+- ✅ Lepsze przygotowanie do enterprise projektów
+- ✅ Mniejszy bundle size
+
+**Porównanie:**
+
+| Aspekt | Expo | Bare CLI |
+|--------|------|----------|
+| Setup time | 2 min | 10 min |
+| Native modules | Ograniczone | Pełne |
+| Bundle size | Większy | Mniejszy |
+| Learning curve | Łatwiejszy | Trudniejszy |
+| Enterprise | Rzadziej | Częściej |
 
 ---
 
-## CZĘŚĆ 6: Setup Środowiska - Przegląd
+## CZĘŚĆ 6: Setup Środowiska - Przegląd (25 minut)
 
-### 6.1. Instalacja Node.js i pnpm (25 minut)
+### 6.1. Wymagania i Instalacja
 
-**SCRIPT:**
+**Wymagania wstępne:**
 
-> „Zanim zaczniemy pisać, musimy zainstalować narzędzia. Będziemy używać pnpm zamiast tradycyjnego npm. pnpm jest szybszy, oszczędza miejsce na dysku i ma lepsze zarządzanie zależnościami."
+| Narzędzie | Wersja | Instalacja |
+|-----------|--------|------------|
+| Node.js | 18+ LTS | nodejs.org lub nvm |
+| pnpm | 8+ | `npm install -g pnpm` |
+| Git | 2.30+ | git-scm.com |
+| Android Studio | Latest | developer.android.com/studio |
+| Java JDK | 17+ | Przez Android Studio |
 
-**Kroki instalacji (dla Windows):**
+**Krok 1: Instalacja Node.js**
+```bash
+# Windows (winget)
+winget install OpenJS.NodeJS.LTS
 
-1. **Pobierz Node.js** (wersja LTS):
-   - Przejdź na nodejs.org
-   - Pobierz wersję oznaczoną LTS (Long-Term Support)
-   - Zainstaluj ze wszystkimi domyślnymi opcjami
-
-2. **Sprawdź instalację Node.js:**
-   ```bash
-   node --version
-   npm --version
-   ```
-
-3. **Zainstaluj pnpm globalnie:**
-   ```bash
-   npm install -g pnpm
-   ```
-
-4. **Sprawdź instalację pnpm:**
-   ```bash
-   pnpm --version
-   ```
-
-**Wyjaśnienie:** Node.js to środowisko JavaScript na serwerze (i lokalnie na naszych komputerach). npm to domyślny menedżer pakietów. pnpm to zaawansowana alternatywa.
-
-**Czemu pnpm?**
-- Szybszy niż npm
-- Mniej miejsca na dysku (cache globalny + hardlinki)
-- Lepszy lock file (`pnpm-lock.yaml`)
-- Wsparcie dla monorepo
-
-### 6.2. Inicjalizacja Projektu (20 minut)
-
-**SCRIPT:**
-
-> „Teraz stworzymy nowy projekt React Native BEZPOŚREDNIO za pomocą React Native CLI, bez Expo. Expo jest fajne na początku, ale my chcemy pełnej kontroli – będziemy móc tworzyć natywne moduły, customować konfigurację, wszystko."
-
-**Kroki:**
-
-1. **Otwórz terminal/PowerShell i przejdź do folderu, gdzie chcesz projekt:**
-   ```bash
-   cd C:\projekty
-   ```
-
-2. **Utwórz projekt za pomocą React Native CLI:**
-   ```bash
-   npx @react-native-community/cli init SolutionOrdersMobile
-   ```
-   
-   **Wyjaśnienie:** CLI automatycznie stworzy projekt z konfiguracją TypeScript. `SolutionOrdersMobile` to nazwa projektu.
-
-3. **Czekaj na instalację** (~2-5 minut, npm będzie pobierać zależności)
-
-4. **Przejdź do folderu projektu:**
-   ```bash
-   cd SolutionOrdersMobile
-   ```
-
-5. **Zainstaluj zależności przez pnpm:**
-   ```bash
-   pnpm install
-   ```
-
-6. **Sprawdzenie struktury:**
-   ```bash
-   dir
-   ```
-   
-   Powinieneś zobaczyć:
-   ```
-   android/              ← Kod Android (Java/Kotlin)
-   ios/                  ← Kod iOS (Swift)
-   node_modules/         ← Zainstalowane pakiety
-   App.tsx               ← Główny komponent (TypeScript!)
-   app.json              ← Konfiguracja aplikacji
-   package.json          ← Zależności
-   tsconfig.json         ← Konfiguracja TypeScript
-   babel.config.js       ← Konfiguracja Babel (transpiler)
-   ```
-
-### 6.3. Konfiguracja pnpm dla React Native (15 minut)
-
-**SCRIPT:**
-
-> „Zanim pójdziemy dalej, musimy zrozumieć strukturę projektu i ustawić pnpm dla React Native."
-
-**Ważne ustawienie dla React Native + pnpm:**
-
-Otwórz plik `.npmrc` w głównym folderze projektu (jeśli nie istnieje – utwórz go):
-
-```ini
-# .npmrc
-node-linker=hoisted
+# Weryfikacja
+node --version   # v18.x.x lub v20.x.x
+npm --version    # 9.x.x lub 10.x.x
 ```
 
-**Wyjaśnienie:** React Native potrzebuje „spłaszczonej" struktury `node_modules` (wszystkie pakiety w jednym poziomie). pnpm domyślnie tworzy strukturę „symlinków" które są lepsze, ale RN nie zawsze je lubi. `node-linker=hoisted` mówi pnpm aby robił to jak npm.
+**Krok 2: Instalacja pnpm**
+```bash
+npm install -g pnpm
+pnpm --version   # 8.x.x lub 9.x.x
+```
 
-### 6.4. Struktura Projektu - Plan
+**Krok 3: Utworzenie projektu**
+```bash
+# Utwórz projekt React Native z TypeScript
+npx @react-native-community/cli init SolutionOrdersMobile
 
-**Struktura folderów którą będziemy budować:**
+# Przejdź do folderu
+cd SolutionOrdersMobile
+
+# Konfiguracja pnpm dla React Native
+echo "node-linker=hoisted" > .npmrc
+
+# Instalacja zależności
+pnpm install
+```
+
+### 6.2. Struktura Projektu
 
 ```
 SolutionOrdersMobile/
-├── android/              (Nie będziemy tutaj edytować)
-├── ios/                  (Nie będziemy tutaj edytować)
-├── src/
-│   ├── api/             ← Komunikacja z .NET API
-│   │   └── apiService.ts
-│   ├── screens/         ← Ekrany aplikacji
-│   │   ├── UnitOfMeasurementScreen.tsx
-│   │   ├── CategoryScreen.tsx
-│   │   ├── ClientScreen.tsx
-│   │   ├── WorkerScreen.tsx
-│   │   ├── ItemScreen.tsx
-│   │   ├── OrderScreen.tsx
-│   │   └── OrderItemScreen.tsx
-│   ├── components/      ← Reużywalne komponenty
-│   │   ├── FormInput.tsx
-│   │   ├── ListItem.tsx
-│   │   └── ActionButtons.tsx
-│   ├── hooks/           ← Custom hooki
-│   │   └── useFetch.ts
-│   ├── utils/           ← Funkcje pomocnicze
-│   │   └── validation.ts
-│   └── constants/       ← Stałe
-│       └── apiEndpoints.ts
-├── App.tsx
-├── app.json
-├── package.json
-└── .npmrc
+├── android/                 # Kod Android (Java/Kotlin)
+│   ├── app/
+│   │   ├── src/main/
+│   │   └── build.gradle
+│   └── build.gradle
+├── ios/                     # Kod iOS (Swift/ObjC)
+│   ├── SolutionOrdersMobile/
+│   └── Podfile
+├── node_modules/            # Zainstalowane pakiety
+├── src/                     # 📁 NASZ KOD (utworzymy)
+│   ├── api/                 # Komunikacja z API
+│   ├── components/          # Komponenty UI
+│   ├── screens/             # Ekrany aplikacji
+│   ├── navigation/          # Nawigacja
+│   ├── hooks/               # Custom hooks
+│   ├── context/             # React Context
+│   ├── types/               # TypeScript types
+│   └── utils/               # Pomocnicze funkcje
+├── App.tsx                  # Główny komponent
+├── package.json             # Zależności
+├── tsconfig.json            # Konfiguracja TypeScript
+├── babel.config.js          # Konfiguracja Babel
+├── metro.config.js          # Metro bundler config
+└── .npmrc                   # Konfiguracja pnpm
 ```
 
-**Punkt nauczania:**
-Dzielenie kodu na moduły jest KLUCZOWE w większych projektach. Każdy folder ma jedną odpowiedzialność. To ułatwia testowanie, debugowanie, i maintenance.
+### 6.3. Uruchomienie na Emulatorze
 
-### 6.5. Uruchomienie na Emulatorze Android (25 minut)
+**Android:**
+```bash
+# 1. Uruchom emulator (przez Android Studio > Device Manager)
+# 2. Uruchom aplikację
+pnpm react-native run-android
+```
 
-**SCRIPT:**
+**iOS (tylko Mac):**
+```bash
+# 1. Zainstaluj CocoaPods
+cd ios && pod install && cd ..
 
-> „Teraz będziemy chcieli zobaczyć naszą aplikację na emulatorze Android. Na początek potrzebujemy emulator. Możemy go zainstalować za pomocą Android Studio."
+# 2. Uruchom aplikację
+pnpm react-native run-ios
+```
 
-**Wymagania:**
-- Android Studio zainstalowany (https://developer.android.com/studio)
-- Emulator Android uruchomiony lub fizyczne urządzenie podłączone
-
-**Uruchomienie aplikacji:**
-
-1. **Upewnij się, że emulator jest uruchomiony** (lub urządzenie podłączone)
-
-2. **Uruchom aplikację:**
-   ```bash
-   pnpm react-native run-android
-   ```
-
-3. **Co się będzie działo:**
-   - React Native CLI skompiluje kod Java/Kotlin
-   - Zbuduje APK
-   - Zainstaluje go na emulatorze
-   - Metro Bundler uruchomi się (serwer bundlujący JS)
-   - Zobaczysz aplikację na ekranie
-
-4. **Jeśli zobaczysz ekran powitalny** – gratulacje! Projekt działa!
-
-**Jeśli pojawią się błędy:**
-- Sprawdź czy JAVA_HOME jest ustawiony: `echo %JAVA_HOME%` (Windows)
-- Sprawdź czy Android SDK jest zainstalowany
-- Uruchom ponownie emulator
-
-**Wyjaśnienie Development Build:**
-
-Development build to wersja aplikacji z hot reloading, debug narzędziami, i łatwościami do developmentu. To NIE jest production build (nie byłby na App Store). Benefit: zmienisz kod w JS, a aplikacja przeładuje się sama.
+**Pierwszy build potrwa 5-10 minut!**
 
 ---
 
-## CZĘŚĆ 7: Najnowsze Trendy (2024-2025)
+## CZĘŚĆ 7: Najnowsze Trendy 2024-2025 (10 minut)
 
 ### 7.1. TypeScript Everywhere
 
 ```typescript
-// 2015: JavaScript wszędzie
-// 2025: TypeScript domyślnie
-const App: React.FC = () => { ... };
+// 2015: JavaScript bez typów
+function add(a, b) {
+  return a + b;  // Co jeśli a="5" i b=3? "53"!
+}
+
+// 2025: TypeScript z pełnym typowaniem
+function add(a: number, b: number): number {
+  return a + b;  // TypeScript nie pozwoli na błąd
+}
 ```
-
-**Status:** TypeScript jest domyślny (tsconfig.json na starcie).
-
-**Korzyści:**
-- ✅ Type safety
-- ✅ Better IDE support
-- ✅ Łatwiejszy refactoring
-- ✅ Mniej bugów w runtime
 
 ### 7.2. Hermes jako Standard
 
-- Domyślny engine w RN 0.82+
-- 10-20% szybszy startup
-- 30% mniej RAM
-- Lepszy debugger
+- ✅ Domyślny engine od RN 0.70+
+- ✅ 10-20% szybszy startup
+- ✅ 30% mniej RAM
+- ✅ Bytecode precompilation
+- ✅ Wbudowany debugger
 
-### 7.3. New Architecture (Bridgeless)
+### 7.3. New Architecture
 
-- Bezpośrednia komunikacja JS ↔ Native
-- Fabric renderer
-- TurboModules
-- JSI (JavaScript Interface)
-
-Status: Stabilny w 2025, ale jeszcze nie domyślny dla wszystkich projektów.
+- ✅ JSI - bezpośrednia komunikacja JS ↔ Native
+- ✅ Fabric - synchroniczny renderer
+- ✅ TurboModules - lazy loading
+- ✅ Codegen - automatyczne generowanie typów
 
 ---
 
-## PODSUMOWANIE WSTĘPU
+## 📝 Zadania Praktyczne
 
-### Czego Się Nauczyliśmy?
+### Zadanie 1: Instalacja środowiska
+Zainstaluj Node.js, pnpm, Android Studio i utwórz projekt testowy.
+
+### Zadanie 2: Hello World
+Zmodyfikuj `App.tsx` aby wyświetlał Twoje imię i datę.
+
+### Zadanie 3: Eksploracja struktury
+Przejrzyj folder `android/` i `ios/` - zidentyfikuj kluczowe pliki.
+
+---
+
+## 🔍 Pytania Kontrolne
+
+1. Czym różni się React Native od Cordova/Ionic?
+2. Co to jest Hermes i dlaczego jest lepszy?
+3. Jak działa komunikacja między JS a kodem natywnym?
+4. Kiedy użyć Expo, a kiedy bare React Native CLI?
+5. Jakie są główne komponenty New Architecture?
+
+---
+
+## ➡️ Następna Lekcja
+
+**[Lekcja 1: TypeScript - Fundamenty](./lekcja-01-typescript.md)**
+
+W następnej lekcji:
+- Typy podstawowe (string, number, boolean)
+- Interfejsy i type aliases
+- Funkcje z typowaniem
+- Klasy i generyki
+- Utility Types
+
+---
+
+## PODSUMOWANIE
 
 **React Native w 2025:**
-- ✅ Dojrzała technologia (10 lat)
-- ✅ Wyprodukowana przez Meta (duży backing)
-- ✅ TypeScript z pudełka
-- ✅ Ogromna społeczność
-- ✅ Wciąż się ewoluuje (New Architecture)
-- ✅ Przyszłość mobilnego developmentu
+- ✅ 10 lat dojrzałości (2015-2025)
+- ✅ Wspierany przez Meta (Facebook)
+- ✅ TypeScript domyślnie
+- ✅ Ogromna społeczność i ekosystem
+- ✅ New Architecture = lepsza wydajność
+- ✅ Świetna przyszłość
 
-**Dlaczego się uczyć RN?**
+**Dlaczego warto się uczyć?**
 1. Wiele firm używa (Discord, Instagram, Uber Eats...)
 2. Jedna umiejętność = 2 platformy
-3. JavaScript - łatwo się uczyć
-4. High paying jobs
+3. JavaScript - łatwo się nauczyć
+4. Wysokie zarobki
 5. Szybki development cycle
-
-### Ścieżka Naukowa w Tym Kursie
-
-```
-Fundamenty React Native (WSTĘP - tutaj jesteśmy)
-        ↓
-Lekcja 2: Komponenty i Stylowanie
-        ↓
-Lekcja 3-4: Nawigacja i State Management
-        ↓
-Lekcja 5-8: Integracja z .NET API (CQRS)
-        ↓
-Lekcja 9: Zaawansowane wzorce
-        ↓
-Lekcja 10-11: Native modules
-        ↓
-Wdrażanie na produkcję! 🚀
-```
 
 ---
 
-**Gotowy na pełny kurs? Lecimy do pierwszej pełnej lekcji! 🚀**
+**Gotowy na pełny kurs? Lecimy do TypeScript! 🚀**

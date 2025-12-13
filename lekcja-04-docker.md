@@ -1,6 +1,7 @@
-# Lekcja 4: Docker + SQL Server + Migracje
+# Lekcja 4: Docker – SQL Server + Migracje + Konteneryzacja
 
-**Moduł:** Infrastruktura  
+**Moduł:** Infrastruktura i DevOps  
+**Czas trwania:** 2,5 godziny  
 **Poziom:** Średnio-zaawansowany
 
 ---
