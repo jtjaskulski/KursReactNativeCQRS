@@ -1,5 +1,7 @@
 # Lekcja 11: Deployment – Budowanie i Publikacja Aplikacji
 
+> **Opracowano dla WSB-NLU 2026 - mgr. Jakub Jaskulski**
+
 **Moduł:** Wdrożenie do produkcji  
 **Czas trwania:** 3 godziny  
 **Poziom:** Zaawansowany
@@ -428,7 +430,7 @@ xcrun altool --upload-app \
 # =========================================
 # STAGE 1: BUILD
 # =========================================
-FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
+FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
 WORKDIR /src
 
 # Kopiuj tylko pliki projektów (dla cache'owania warstw)
@@ -455,7 +457,7 @@ RUN dotnet publish "SolutionOrdersReact.Server.csproj" \
 # =========================================
 # STAGE 3: RUNTIME (mały obraz!)
 # =========================================
-FROM mcr.microsoft.com/dotnet/aspnet:8.0-alpine AS final
+FROM mcr.microsoft.com/dotnet/aspnet:10.0-alpine AS final
 
 # Utwórz non-root użytkownika dla bezpieczeństwa
 RUN addgroup -S appgroup && adduser -S appuser -G appgroup

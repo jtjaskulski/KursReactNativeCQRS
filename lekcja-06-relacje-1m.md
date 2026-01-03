@@ -1,5 +1,7 @@
 # Lekcja 6: Relacje 1:M w CQRS – Produkty, Kategorie, Jednostki (2 godziny)
 
+> **Opracowano dla WSB-NLU 2026 - mgr. Jakub Jaskulski**
+
 **Moduł:** Relacje 1:M, foreign keys w praktyce  
 **Czas trwania:** 2 godziny
 
@@ -58,6 +60,20 @@ public virtual ICollection<Item> Items { get; set; } = new List<Item>();
 pnpm add @react-native-picker/picker
 ```
 
+**⚠️ WAŻNE: Po instalacji natywnej biblioteki musisz przebudować aplikację!**
+
+```bash
+# Android - pełny rebuild
+cd android && ./gradlew clean && cd ..
+pnpm react-native run-android
+
+# iOS (tylko Mac)
+cd ios && pod install && cd ..
+pnpm react-native run-ios
+```
+
+> **Wskazówka:** Hot Reload NIE wystarczy dla natywnych modułów. Zawsze wykonaj pełny build po dodaniu biblioteki z natywnym kodem.
+
 ### 2.2. Komponent PickerField
 
 **src/components/PickerField.tsx:**
@@ -72,7 +88,12 @@ interface PickerFieldProps<T> {
   items: T[];
   getValue: (item: T) => string | number;
   getLabel: (item: T) => string;
-  onChange: (value: string | number) => void;
+  onChange: (value: string | number | null) => void;
+  // Opcjonalne props (używane w lekcji 07)
+  placeholder?: string;
+  required?: boolean;
+  disabled?: boolean;
+  error?: string;
 }
 
 export function PickerField<T>({
@@ -82,32 +103,57 @@ export function PickerField<T>({
   getValue,
   getLabel,
   onChange,
+  placeholder = 'Wybierz...',
+  required = false,
+  disabled = false,
+  error,
 }: PickerFieldProps<T>) {
   return (
     <View style={styles.container}>
-      <Text style={styles.label}>{label}</Text>
-      <Picker
-        selectedValue={value}
-        onValueChange={onChange}
-        style={styles.picker}
-      >
-        <Picker.Item label="Wybierz..." value={null} />
-        {items.map((item) => (
-          <Picker.Item
-            key={getValue(item).toString()}
-            label={getLabel(item)}
-            value={getValue(item)}
-          />
-        ))}
-      </Picker>
+      <Text style={styles.label}>
+        {label}
+        {required && <Text style={styles.required}> *</Text>}
+      </Text>
+      <View style={[
+        styles.pickerContainer,
+        disabled && styles.disabled,
+        error && styles.errorBorder,
+      ]}>
+        <Picker
+          selectedValue={value}
+          onValueChange={onChange}
+          style={styles.picker}
+          enabled={!disabled}
+        >
+          <Picker.Item label={placeholder} value={null} />
+          {items.map((item) => (
+            <Picker.Item
+              key={getValue(item).toString()}
+              label={getLabel(item)}
+              value={getValue(item)}
+            />
+          ))}
+        </Picker>
+      </View>
+      {error && <Text style={styles.errorText}>{error}</Text>}
     </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: { marginBottom: 16 },
-  label: { fontWeight: '600', marginBottom: 8 },
-  picker: { backgroundColor: '#fff', borderRadius: 4 }
+  label: { fontWeight: '600', marginBottom: 8, color: '#333' },
+  required: { color: '#F44336' },
+  pickerContainer: {
+    backgroundColor: '#fff',
+    borderRadius: 4,
+    borderWidth: 1,
+    borderColor: '#ddd',
+  },
+  picker: { height: 50 },
+  disabled: { backgroundColor: '#f5f5f5', opacity: 0.7 },
+  errorBorder: { borderColor: '#F44336' },
+  errorText: { color: '#F44336', fontSize: 12, marginTop: 4 },
 });
 ```
 

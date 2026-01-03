@@ -1,5 +1,7 @@
 # Lekcja 7: Zamówienia – Relacje Master-Detail (Order → OrderItem)
 
+> **Opracowano dla WSB-NLU 2026 - mgr. Jakub Jaskulski**
+
 **Moduł:** Relacje Master-Detail, logika biznesowa zamówień  
 **Czas trwania:** 3 godziny  
 **Poziom:** Średnio-zaawansowany

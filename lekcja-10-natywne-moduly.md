@@ -1,5 +1,7 @@
 # Lekcja 10: Natywne Moduły – Permissions, Camera, Geolokalizacja
 
+> **Opracowano dla WSB-NLU 2026 - mgr. Jakub Jaskulski**
+
 **Moduł:** Integracja z funkcjami urządzenia  
 **Czas trwania:** 3 godziny  
 **Poziom:** Zaawansowany
@@ -1362,13 +1364,24 @@ const styles = StyleSheet.create({
 
 > „Czasami gotowa biblioteka nie wystarczy i musimy napisać własny natywny moduł. Pokażę prosty przykład dla Androida - moduł do wibracji."
 
+> **⚠️ UWAGA: Kotlin vs Java**
+> 
+> Nowsze projekty React Native (od 0.73+) używają **Kotlin** jako domyślny język dla Androida. 
+> Poniższy przykład pokazany jest w **Java** dla kompatybilności z dokumentacją, ale jeśli Twój 
+> projekt używa Kotlin (sprawdź czy masz `MainActivity.kt`), możesz:
+> 
+> 1. Tworzyć moduły w Kotlin (zalecane) - składnia jest bardzo podobna
+> 2. Mieszać Java i Kotlin w tym samym projekcie (działa bez problemu)
+> 
+> Kotlin jest w pełni kompatybilny z Java i możesz używać obu języków w jednym projekcie.
+
 ```
 android/app/src/main/java/com/solutionordersmobile/
-├── MainApplication.java
-├── MainActivity.java
+├── MainApplication.kt            ← Kotlin (nowsze projekty)
+├── MainActivity.kt               ← Kotlin (nowsze projekty)
 └── vibration/                    ← Nasz moduł
-    ├── VibrationModule.java      ← Logika
-    └── VibrationPackage.java     ← Rejestracja
+    ├── VibrationModule.java      ← Java (lub .kt dla Kotlin)
+    └── VibrationPackage.java     ← Java (lub .kt dla Kotlin)
 ```
 
 ### 6.2. VibrationModule.java

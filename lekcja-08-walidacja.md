@@ -1,5 +1,7 @@
 # Lekcja 8: Walidacja – FluentValidation + Pipeline Behaviors
 
+> **Opracowano dla WSB-NLU 2026 - mgr. Jakub Jaskulski**
+
 **Moduł:** Walidacja danych, obsługa błędów  
 **Czas trwania:** 2,5 godziny  
 **Poziom:** Średnio-zaawansowany
@@ -175,6 +177,13 @@ Install-Package FluentValidation.DependencyInjectionExtensions -Version 11.7.0
 dotnet add package FluentValidation.AspNetCore --version 11.7.0
 dotnet add package FluentValidation.DependencyInjectionExtensions --version 11.7.0
 ```
+
+> **⚠️ Uwaga o wersjonowaniu:**
+> 
+> Pakiet `FluentValidation.AspNetCore` został oznaczony jako **deprecated** (przestarzały) od wersji 11.x.
+> Oficjalne zalecenie to używanie **FluentValidation** z **ręczną integracją** przez MediatR Pipeline Behaviors,
+> co właśnie robimy w tej lekcji. Pakiet nadal działa i jest wspierany, ale nowe projekty powinny
+> preferować integrację przez Behaviors (patrz sekcja 3.1).
 
 ### 2.2. Rejestracja w Program.cs
 

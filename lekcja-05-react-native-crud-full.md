@@ -1,5 +1,7 @@
 # Lekcja 5: React Native - Integracja z API CQRS - ROZSZERZONA
 
+> **Opracowano dla WSB-NLU 2026 - mgr. Jakub Jaskulski**
+
 **Moduł:** React Native + .NET Integration  
 **Poziom:** Średnio-zaawansowany
 
@@ -269,6 +271,28 @@ export interface UpdateItemRequest extends CreateItemRequest {
 }
 ```
 
+### 2.2. src/navigation/types.ts
+
+**Typy nawigacji używane w całej aplikacji:**
+
+```typescript
+import type { Item } from '../types/models';
+
+export type RootStackParamList = {
+  Home: undefined;
+  Items: undefined;
+  CreateItem: undefined;
+  EditItem: { item: Item };
+  Categories: undefined;
+  Units: undefined;
+  Clients: undefined;
+  Workers: undefined;
+  Orders: undefined;
+  CreateOrder: undefined;
+  EditOrder: { orderId: number };
+};
+```
+
 ---
 
 ## CZĘŚĆ 3: API Service z TypeScript
@@ -282,6 +306,7 @@ import type {
   UnitOfMeasurement,
   Category,
   Client,
+  Worker,
   Item,
   CreateItemRequest,
   UpdateItemRequest,
@@ -454,6 +479,19 @@ class ApiService {
 
   async createClient(data: Omit<Client, 'idClient'>): Promise<{ id: number }> {
     return this.request<{ id: number }>('/Client', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  }
+
+  // ========== PRACOWNICY ==========
+
+  async getWorkers(): Promise<Worker[]> {
+    return this.request<Worker[]>('/Worker');
+  }
+
+  async createWorker(data: Omit<Worker, 'idWorker'>): Promise<{ id: number }> {
+    return this.request<{ id: number }>('/Worker', {
       method: 'POST',
       body: JSON.stringify(data),
     });

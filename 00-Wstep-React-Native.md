@@ -1,5 +1,7 @@
 # WSTĘP: Czym jest React Native? Architektura i Historia
 
+> **Opracowano dla WSB-NLU 2026 - mgr. Jakub Jaskulski**
+
 **Moduł:** Wprowadzenie do React Native  
 **Czas trwania:** 2 godziny  
 **Poziom:** Początkujący

@@ -1,5 +1,7 @@
 # Lekcja 9: Zaawansowane CQRS – Paginacja, Filtrowanie, Audyt
 
+> **Opracowano dla WSB-NLU 2026 - mgr. Jakub Jaskulski**
+
 **Moduł:** Optymalizacja zapytań, śledzenie zmian  
 **Czas trwania:** 2,5 godziny  
 **Poziom:** Zaawansowany

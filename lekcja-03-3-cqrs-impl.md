@@ -1,5 +1,7 @@
 # Lekcja 3: .NET Backend – CQRS Queries i Commands
 
+> **Opracowano dla WSB-NLU 2026 - mgr. Jakub Jaskulski**
+
 **Moduł:** .NET Backend - CQRS  
 **Czas trwania:** 3 godziny  
 **Poziom:** Średnio-zaawansowany

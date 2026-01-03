@@ -1,5 +1,7 @@
 # Lekcja 1: TypeScript - Fundamenty
 
+> **Opracowano dla WSB-NLU 2026 - mgr. Jakub Jaskulski**
+
 **Moduł:** TypeScript Podstawy  
 **Czas trwania:** 3 godziny  
 **Poziom:** Początkujący (dla osób znających JavaScript)

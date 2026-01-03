@@ -1,5 +1,7 @@
 # Lekcja 4: Docker – SQL Server + Migracje + Konteneryzacja
 
+> **Opracowano dla WSB-NLU 2026 - mgr. Jakub Jaskulski**
+
 **Moduł:** Infrastruktura i DevOps  
 **Czas trwania:** 2,5 godziny  
 **Poziom:** Średnio-zaawansowany
@@ -104,7 +106,7 @@ services:
     
     # Health check
     healthcheck:
-      test: /opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P YourStrong@Password123 -Q "SELECT 1" || exit 1
+      test: /opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P "YourStrong@Password123" -C -Q "SELECT 1" || exit 1
       interval: 10s
       timeout: 3s
       retries: 10
@@ -421,12 +423,12 @@ Update-Database
 W głównym katalogu **SolutionOrdersReact/** utwórz `Dockerfile`:
 
 ```dockerfile
-FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS base
+FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS base
 WORKDIR /app
 EXPOSE 8080
 EXPOSE 8081
 
-FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
+FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
 
@@ -464,6 +466,8 @@ COPY --from=publish /app/publish .
 ENTRYPOINT ["dotnet", "SolutionOrdersReact.Server.dll"]
 ```
 
+**⚠️ UWAGA:** Jeśli .NET 10 nie jest jeszcze dostępny w Docker Hub, użyj `9.0` lub `8.0` i zmień `TargetFramework` w `.csproj`.
+
 ### 5.2. docker-compose.yml (API + DB)
 
 ```yaml
@@ -477,10 +481,10 @@ services:
     container_name: orders-react-api
     ports:
       - "5000:8080"
-      - "5001:8081"
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
-      - ASPNETCORE_URLS=http://+:8080;https://+:8081
+      - ASPNETCORE_URLS=http://+:8080
+      - ASPNETCORE_HTTP_PORTS=8080
       - ConnectionStrings__DefaultConnection=Server=sqlserver;Database=TestReactDb;User=sa;Password=YourStrong@Password123;TrustServerCertificate=True
     depends_on:
       sqlserver:

@@ -1,5 +1,7 @@
 # GLOSARIUSZ: React Native + TypeScript + .NET CQRS
 
+> **Opracowano dla WSB-NLU 2026 - mgr. Jakub Jaskulski**
+
 **Kompletny słowniczek pojęć, technologii i wzorców z kursu**
 
 ---
