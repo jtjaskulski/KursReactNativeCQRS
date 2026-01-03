@@ -1,30 +1,30 @@
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace SolutionOrdersReact.Server.Models
 {
     /// <summary>
-    /// Klient składający zamówienia
+    /// Pracownik obsługujący zamówienia
     /// </summary>
-    [Table("Clients")]
-    public class Client
+    [Table("Workers")]
+    public class Worker
     {
         // ========== PRIMARY KEY ==========
 
         [Key]
-        public int IdClient { get; set; }
+        public int IdWorker { get; set; }
 
         // ========== DANE OSOBOWE ==========
 
         /// <summary>
-        /// Imię klienta
+        /// Imię pracownika
         /// </summary>
         [Required]
         [MaxLength(100)]
         public string? FirstName { get; set; }
 
         /// <summary>
-        /// Nazwisko klienta
+        /// Nazwisko pracownika
         /// </summary>
         [Required]
         [MaxLength(100)]
@@ -33,13 +33,13 @@ namespace SolutionOrdersReact.Server.Models
         // ========== DANE KONTAKTOWE ==========
 
         /// <summary>
-        /// Adres email
+        /// Adres email służbowy
         /// </summary>
         [MaxLength(200)]
         public string? Email { get; set; }
 
         /// <summary>
-        /// Numer telefonu
+        /// Numer telefonu służbowy
         /// </summary>
         [MaxLength(20)]
         public string? Phone { get; set; }
@@ -67,24 +67,23 @@ namespace SolutionOrdersReact.Server.Models
         // ========== STATUS ==========
 
         /// <summary>
-        /// Czy klient jest aktywny (soft delete)
+        /// Czy pracownik jest aktywny (soft delete)
         /// </summary>
         public bool IsActive { get; set; } = true;
 
         // ========== NAVIGATION PROPERTIES ==========
 
         /// <summary>
-        /// Kolekcja zamówień klienta (1:M)
+        /// Kolekcja zamówień obsługiwanych przez pracownika (1:M)
         /// </summary>
         public virtual ICollection<Order> Orders { get; set; } = new List<Order>();
 
         // ========== COMPUTED PROPERTIES ==========
 
         /// <summary>
-        /// Pełne imię i nazwisko klienta
+        /// Pełne imię i nazwisko pracownika
         /// </summary>
         [NotMapped]
         public string FullName => $"{FirstName} {LastName}";
     }
 }
-

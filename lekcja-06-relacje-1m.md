@@ -11,7 +11,7 @@
 
 Po ukończeniu tej lekcji będziesz potrafić:
 - ✅ Modelować relacje jeden-do-wielu (1:M) w EF Core
-- ✅ Obsłużyć selectory relacyjne w React Native (Chip UI oraz Picker)
+- ✅ Obsłużyć pickery relacyjne w React Native
 - ✅ Rozwijać zapytania CQRS do mapowania relacji
 - ✅ Budować formularze i listy produktów z kategorią i jednostką miary
 
@@ -52,135 +52,10 @@ public virtual ICollection<Item> Items { get; set; } = new List<Item>();
 
 ---
 
-## CZĘŚĆ 2: Selectory relacyjne w React Native (30 minut)
+## CZĘŚĆ 2: PickerField w React Native (30 minut)
 
-W React Native mamy dwa popularne podejścia do wyboru wartości z listy:
+### 2.1. Instalacja Picker
 
-| Podejście | Zalety | Wady |
-|-----------|--------|------|
-| **Chip UI** | Wizualne, touch-friendly, widoczne wszystkie opcje | Zajmuje więcej miejsca |
-| **Native Picker** | Kompaktowy, natywny wygląd | Wymaga dodatkowej biblioteki |
-
-### 2.1. Podejście A: Chip UI (TouchableOpacity) — ZALECANE
-
-To podejście używamy w naszym projekcie. Nie wymaga dodatkowych bibliotek natywnych.
-
-**Implementacja w formularzu:**
-```tsx
-import { TouchableOpacity, Text, View, StyleSheet } from 'react-native';
-
-// W komponencie formularza:
-const [idCategory, setIdCategory] = useState('');
-const [categories, setCategories] = useState<Category[]>([]);
-
-// JSX:
-<Text style={styles.label}>Kategoria *</Text>
-<View style={styles.pickerContainer}>
-  {categories.map(cat => {
-    const isSelected = idCategory === cat.idCategory.toString();
-    return (
-      <TouchableOpacity
-        key={cat.idCategory}
-        style={[
-          styles.chip,
-          isSelected && styles.chipSelected,
-        ]}
-        onPress={() => setIdCategory(cat.idCategory.toString())}
-        activeOpacity={0.7}
-      >
-        <Text style={[
-          styles.chipText,
-          isSelected && styles.chipTextSelected,
-        ]}>
-          {cat.name || 'Brak'}
-        </Text>
-      </TouchableOpacity>
-    );
-  })}
-</View>
-```
-
-**Style dla Chip UI:**
-```tsx
-const styles = StyleSheet.create({
-  pickerContainer: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 8,
-    marginBottom: 8,
-  },
-  chip: {
-    paddingHorizontal: 16,
-    paddingVertical: 10,
-    borderRadius: 8,
-    backgroundColor: '#e0e0e0',
-    borderWidth: 2,
-    borderColor: '#e0e0e0',
-  },
-  chipSelected: {
-    backgroundColor: '#007AFF',
-    borderColor: '#007AFF',
-  },
-  chipText: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#333',
-  },
-  chipTextSelected: {
-    color: '#fff',
-  },
-});
-```
-
-**Obsługa opcjonalnych pól (np. jednostka miary):**
-```tsx
-<Text style={styles.label}>Jednostka miary</Text>
-<View style={styles.pickerContainer}>
-  {/* Opcja "Brak" dla pól opcjonalnych */}
-  <TouchableOpacity
-    style={[
-      styles.chip,
-      idUnitOfMeasurement === '' && styles.chipSelected,
-    ]}
-    onPress={() => setIdUnitOfMeasurement('')}
-    activeOpacity={0.7}
-  >
-    <Text style={[
-      styles.chipText,
-      idUnitOfMeasurement === '' && styles.chipTextSelected,
-    ]}>
-      Brak
-    </Text>
-  </TouchableOpacity>
-  {units.map(unit => {
-    const isSelected = idUnitOfMeasurement === unit.idUnitOfMeasurement.toString();
-    return (
-      <TouchableOpacity
-        key={unit.idUnitOfMeasurement}
-        style={[
-          styles.chip,
-          isSelected && styles.chipSelected,
-        ]}
-        onPress={() => setIdUnitOfMeasurement(unit.idUnitOfMeasurement.toString())}
-        activeOpacity={0.7}
-      >
-        <Text style={[
-          styles.chipText,
-          isSelected && styles.chipTextSelected,
-        ]}>
-          {unit.name || 'Brak'}
-        </Text>
-      </TouchableOpacity>
-    );
-  })}
-</View>
-```
-
-### 2.2. Podejście B: PickerField (natywny Picker)
-
-Alternatywnie możemy użyć natywnego Picker z biblioteki `@react-native-picker/picker`.
-
-**Instalacja:**
 ```bash
 pnpm add @react-native-picker/picker
 ```
@@ -199,7 +74,11 @@ pnpm react-native run-ios
 
 > **Wskazówka:** Hot Reload NIE wystarczy dla natywnych modułów. Zawsze wykonaj pełny build po dodaniu biblioteki z natywnym kodem.
 
-**Komponent PickerField (src/components/PickerField.tsx):**
+### 2.2. Komponent PickerField
+
+Tworzymy reużywalny komponent do wyboru wartości z listy.
+
+**src/components/PickerField.tsx:**
 ```tsx
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
@@ -279,72 +158,43 @@ const styles = StyleSheet.create({
 });
 ```
 
-**Użycie PickerField w formularzu:**
+### 2.3. Kluczowe cechy PickerField
+
+| Właściwość | Opis |
+|------------|------|
+| `label` | Etykieta nad pickerem |
+| `value` | Obecnie wybrana wartość |
+| `items` | Tablica elementów do wyboru |
+| `getValue` | Funkcja zwracająca wartość elementu |
+| `getLabel` | Funkcja zwracająca wyświetlany tekst |
+| `onChange` | Callback wywoływany przy zmianie |
+| `placeholder` | Tekst dla opcji "brak wyboru" |
+| `required` | Wyświetla gwiazdkę przy etykiecie |
+| `disabled` | Wyłącza picker |
+| `error` | Tekst błędu walidacji |
+
+---
+
+## CZĘŚĆ 3: Formularz produktu z PickerField (40 minut)
+
+### 3.1. Importy i stan formularza
+
 ```tsx
 import { PickerField } from '../components/PickerField';
+import type { Category, UnitOfMeasurement } from '../types/models';
 
-// W formularzu:
-<PickerField
-  label="Kategoria"
-  value={formData.idCategory}
-  items={categories || []}
-  getValue={cat => cat.idCategory}
-  getLabel={cat => cat.name || ''}
-  onChange={val => setFormData(fd => ({ ...fd, idCategory: val }))}
-  required
-/>
+// Stan formularza - używamy number | null dla ID
+const [idCategory, setIdCategory] = useState<number | null>(null);
+const [idUnitOfMeasurement, setIdUnitOfMeasurement] = useState<number | null>(null);
 
-<PickerField
-  label="Jednostka"
-  value={formData.idUnitOfMeasurement}
-  items={units || []}
-  getValue={u => u.idUnitOfMeasurement}
-  getLabel={u => u.name || ''}
-  onChange={val => setFormData(fd => ({ ...fd, idUnitOfMeasurement: val }))}
-/>
-```
-
----
-
-## CZĘŚĆ 3: Rozszerzony CRUD dla Item (30 minut)
-
-### 3.1. Queries (połączone dane)
-
-**Backend — ItemDto:**
-```csharp
-public string? CategoryName { get; set; }
-public string? UnitName { get; set; }
-// ...w handlerze .Include().Select()
-```
-
-### 3.2. Ekran Listy produktów
-
-```tsx
-<FlatList
-  data={items}
-  renderItem={({ item }) => (
-    <ItemCard
-      name={item.name}
-      price={item.price}
-      categoryName={item.categoryName}
-      unitName={item.unitName}
-    />
-  )}
-  // ...
-/>
-```
-
----
-
-## CZĘŚĆ 4: Formularz produktu — pełna implementacja (40 minut)
-
-### 4.1. Pobieranie danych słownikowych
-
-```tsx
+// Dane słownikowe
 const [categories, setCategories] = useState<Category[]>([]);
 const [units, setUnits] = useState<UnitOfMeasurement[]>([]);
-const [loading, setLoading] = useState(true);
+```
 
+### 3.2. Pobieranie danych słownikowych
+
+```tsx
 useEffect(() => {
   const loadData = async () => {
     try {
@@ -364,7 +214,34 @@ useEffect(() => {
 }, []);
 ```
 
-### 4.2. Walidacja formularza
+### 3.3. Użycie PickerField w formularzu
+
+```tsx
+<PickerField
+  label="Kategoria"
+  value={idCategory}
+  items={categories}
+  getValue={cat => cat.idCategory}
+  getLabel={cat => cat.name || 'Brak nazwy'}
+  onChange={val => setIdCategory(val as number | null)}
+  placeholder="Wybierz kategorię..."
+  required
+  disabled={submitting}
+/>
+
+<PickerField
+  label="Jednostka miary"
+  value={idUnitOfMeasurement}
+  items={units}
+  getValue={u => u.idUnitOfMeasurement}
+  getLabel={u => u.name || 'Brak nazwy'}
+  onChange={val => setIdUnitOfMeasurement(val as number | null)}
+  placeholder="Brak jednostki"
+  disabled={submitting}
+/>
+```
+
+### 3.4. Walidacja i wysłanie formularza
 
 ```tsx
 const handleSubmit = async () => {
@@ -385,10 +262,8 @@ const handleSubmit = async () => {
       description: description.trim() || undefined,
       price: price ? parseFloat(price) : undefined,
       quantity: quantity ? parseFloat(quantity) : undefined,
-      idCategory: parseInt(idCategory),
-      idUnitOfMeasurement: idUnitOfMeasurement
-        ? parseInt(idUnitOfMeasurement)
-        : undefined,
+      idCategory: idCategory,
+      idUnitOfMeasurement: idUnitOfMeasurement ?? undefined,
       code: code.trim() || undefined,
     });
 
@@ -403,42 +278,86 @@ const handleSubmit = async () => {
 };
 ```
 
-### 4.3. Pola formularza
+### 3.5. Pola formularza — podsumowanie
 
-| Pole | Typ | Wymagane | Uwagi |
-|------|-----|----------|-------|
-| name | TextInput | ✅ | Nazwa produktu |
-| description | TextInput (multiline) | ❌ | Opis |
-| price | TextInput (decimal-pad) | ❌ | Cena |
-| quantity | TextInput (decimal-pad) | ❌ | Ilość |
-| code | TextInput | ❌ | Kod produktu |
-| idCategory | Chip/Picker | ✅ | Kategoria |
-| idUnitOfMeasurement | Chip/Picker | ❌ | Jednostka miary |
+| Pole | Typ | Wymagane | Komponent |
+|------|-----|----------|-----------|
+| name | string | ✅ | TextInput |
+| description | string | ❌ | TextInput (multiline) |
+| price | number | ❌ | TextInput (decimal-pad) |
+| quantity | number | ❌ | TextInput (decimal-pad) |
+| code | string | ❌ | TextInput |
+| idCategory | number | ✅ | PickerField |
+| idUnitOfMeasurement | number | ❌ | PickerField |
+
+---
+
+## CZĘŚĆ 4: Rozszerzony CRUD dla Item (20 minut)
+
+### 4.1. Queries (połączone dane)
+
+**Backend — ItemDto:**
+```csharp
+public string? CategoryName { get; set; }
+public string? UnitName { get; set; }
+// ...w handlerze .Include().Select()
+```
+
+### 4.2. Ekran listy produktów
+
+```tsx
+<FlatList
+  data={items}
+  renderItem={({ item }) => (
+    <ItemCard
+      name={item.name}
+      price={item.price}
+      categoryName={item.categoryName}
+      unitName={item.unitName}
+    />
+  )}
+  // ...
+/>
+```
+
+### 4.3. Edycja produktu — inicjalizacja stanu
+
+```tsx
+// Form state - inicjalizacja z przekazanego itemu
+const [idCategory, setIdCategory] = useState<number | null>(item.idCategory);
+const [idUnitOfMeasurement, setIdUnitOfMeasurement] = useState<number | null>(
+  item.idUnitOfMeasurement ?? null
+);
+```
 
 ---
 
 ## 📝 Zadania Praktyczne
 
-### Zadanie 1: CRUD dla klientów (Client) z selectorem relacyjnym
-Zaimplementuj ekrany tworzenia i edycji klienta z wyborem kategorii klienta (jeśli istnieje).
+### Zadanie 1: CRUD dla klientów (Client) z PickerField
+Zaimplementuj ekrany tworzenia i edycji klienta. Jeśli klient ma kategorię, użyj PickerField do jej wyboru.
 
-### Zadanie 2: Refaktoryzacja do ChipSelector
-Wyodrębnij logikę Chip UI do reużywalnego komponentu `ChipSelector`:
+### Zadanie 2: Dodaj walidację błędów do PickerField
+Rozszerz formularz o obsługę błędów walidacji dla PickerField:
 ```tsx
-interface ChipSelectorProps<T> {
-  items: T[];
-  selectedValue: string;
-  onSelect: (value: string) => void;
-  getValue: (item: T) => string;
-  getLabel: (item: T) => string;
-  allowEmpty?: boolean;
-  emptyLabel?: string;
-  disabled?: boolean;
+const [errors, setErrors] = useState<{category?: string}>({});
+
+// W walidacji:
+if (!idCategory) {
+  setErrors(e => ({ ...e, category: 'Wybierz kategorię' }));
+  return;
 }
+
+// W PickerField:
+<PickerField
+  label="Kategoria"
+  // ...
+  error={errors.category}
+/>
 ```
 
-### Zadanie 3: Obsługa „Brak kategorii" / „Brak jednostki" jako null
-Upewnij się, że opcjonalne pola (jak `idUnitOfMeasurement`) poprawnie obsługują wartość pustą i wysyłają `null` do API.
+### Zadanie 3: Obsługa „Brak jednostki" jako null
+Upewnij się, że opcjonalne pola (jak `idUnitOfMeasurement`) poprawnie obsługują wartość pustą i wysyłają `undefined` do API zamiast `null`.
 
 ---
 
