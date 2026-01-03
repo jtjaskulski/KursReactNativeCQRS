@@ -1,4 +1,4 @@
-# Lekcja 6: Relacje 1:M w CQRS – Produkty, Kategorie, Jednostki (2 godziny)
+# Lekcja 6: Relacje 1:M w CQRS — Produkty, Kategorie, Jednostki (2 godziny)
 
 > **Opracowano dla WSB-NLU 2026 - mgr. Jakub Jaskulski**
 
@@ -11,7 +11,7 @@
 
 Po ukończeniu tej lekcji będziesz potrafić:
 - ✅ Modelować relacje jeden-do-wielu (1:M) w EF Core
-- ✅ Obsłużyć pickery relacyjne w React Native
+- ✅ Obsłużyć selectory relacyjne w React Native (Chip UI oraz Picker)
 - ✅ Rozwijać zapytania CQRS do mapowania relacji
 - ✅ Budować formularze i listy produktów z kategorią i jednostką miary
 
@@ -24,7 +24,7 @@ Po ukończeniu tej lekcji będziesz potrafić:
 - Każdy produkt (Item) należy do jednej kategorii
 - Każda kategoria ma wiele produktów
 
-**EF Core – Item.cs:**
+**EF Core — Item.cs:**
 ```csharp
 public int IdCategory { get; set; }
 public virtual Category Category { get; set; } = null!;
@@ -52,10 +52,135 @@ public virtual ICollection<Item> Items { get; set; } = new List<Item>();
 
 ---
 
-## CZĘŚĆ 2: PickerField w React Native (30 minut)
+## CZĘŚĆ 2: Selectory relacyjne w React Native (30 minut)
 
-### 2.1. Instalacja Picker
+W React Native mamy dwa popularne podejścia do wyboru wartości z listy:
 
+| Podejście | Zalety | Wady |
+|-----------|--------|------|
+| **Chip UI** | Wizualne, touch-friendly, widoczne wszystkie opcje | Zajmuje więcej miejsca |
+| **Native Picker** | Kompaktowy, natywny wygląd | Wymaga dodatkowej biblioteki |
+
+### 2.1. Podejście A: Chip UI (TouchableOpacity) — ZALECANE
+
+To podejście używamy w naszym projekcie. Nie wymaga dodatkowych bibliotek natywnych.
+
+**Implementacja w formularzu:**
+```tsx
+import { TouchableOpacity, Text, View, StyleSheet } from 'react-native';
+
+// W komponencie formularza:
+const [idCategory, setIdCategory] = useState('');
+const [categories, setCategories] = useState<Category[]>([]);
+
+// JSX:
+<Text style={styles.label}>Kategoria *</Text>
+<View style={styles.pickerContainer}>
+  {categories.map(cat => {
+    const isSelected = idCategory === cat.idCategory.toString();
+    return (
+      <TouchableOpacity
+        key={cat.idCategory}
+        style={[
+          styles.chip,
+          isSelected && styles.chipSelected,
+        ]}
+        onPress={() => setIdCategory(cat.idCategory.toString())}
+        activeOpacity={0.7}
+      >
+        <Text style={[
+          styles.chipText,
+          isSelected && styles.chipTextSelected,
+        ]}>
+          {cat.name || 'Brak'}
+        </Text>
+      </TouchableOpacity>
+    );
+  })}
+</View>
+```
+
+**Style dla Chip UI:**
+```tsx
+const styles = StyleSheet.create({
+  pickerContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
+    marginBottom: 8,
+  },
+  chip: {
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    borderRadius: 8,
+    backgroundColor: '#e0e0e0',
+    borderWidth: 2,
+    borderColor: '#e0e0e0',
+  },
+  chipSelected: {
+    backgroundColor: '#007AFF',
+    borderColor: '#007AFF',
+  },
+  chipText: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#333',
+  },
+  chipTextSelected: {
+    color: '#fff',
+  },
+});
+```
+
+**Obsługa opcjonalnych pól (np. jednostka miary):**
+```tsx
+<Text style={styles.label}>Jednostka miary</Text>
+<View style={styles.pickerContainer}>
+  {/* Opcja "Brak" dla pól opcjonalnych */}
+  <TouchableOpacity
+    style={[
+      styles.chip,
+      idUnitOfMeasurement === '' && styles.chipSelected,
+    ]}
+    onPress={() => setIdUnitOfMeasurement('')}
+    activeOpacity={0.7}
+  >
+    <Text style={[
+      styles.chipText,
+      idUnitOfMeasurement === '' && styles.chipTextSelected,
+    ]}>
+      Brak
+    </Text>
+  </TouchableOpacity>
+  {units.map(unit => {
+    const isSelected = idUnitOfMeasurement === unit.idUnitOfMeasurement.toString();
+    return (
+      <TouchableOpacity
+        key={unit.idUnitOfMeasurement}
+        style={[
+          styles.chip,
+          isSelected && styles.chipSelected,
+        ]}
+        onPress={() => setIdUnitOfMeasurement(unit.idUnitOfMeasurement.toString())}
+        activeOpacity={0.7}
+      >
+        <Text style={[
+          styles.chipText,
+          isSelected && styles.chipTextSelected,
+        ]}>
+          {unit.name || 'Brak'}
+        </Text>
+      </TouchableOpacity>
+    );
+  })}
+</View>
+```
+
+### 2.2. Podejście B: PickerField (natywny Picker)
+
+Alternatywnie możemy użyć natywnego Picker z biblioteki `@react-native-picker/picker`.
+
+**Instalacja:**
 ```bash
 pnpm add @react-native-picker/picker
 ```
@@ -74,9 +199,7 @@ pnpm react-native run-ios
 
 > **Wskazówka:** Hot Reload NIE wystarczy dla natywnych modułów. Zawsze wykonaj pełny build po dodaniu biblioteki z natywnym kodem.
 
-### 2.2. Komponent PickerField
-
-**src/components/PickerField.tsx:**
+**Komponent PickerField (src/components/PickerField.tsx):**
 ```tsx
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
@@ -89,7 +212,6 @@ interface PickerFieldProps<T> {
   getValue: (item: T) => string | number;
   getLabel: (item: T) => string;
   onChange: (value: string | number | null) => void;
-  // Opcjonalne props (używane w lekcji 07)
   placeholder?: string;
   required?: boolean;
   disabled?: boolean;
@@ -157,9 +279,11 @@ const styles = StyleSheet.create({
 });
 ```
 
-### 2.3. Implementacja w formularzu produktu
-
+**Użycie PickerField w formularzu:**
 ```tsx
+import { PickerField } from '../components/PickerField';
+
+// W formularzu:
 <PickerField
   label="Kategoria"
   value={formData.idCategory}
@@ -167,6 +291,7 @@ const styles = StyleSheet.create({
   getValue={cat => cat.idCategory}
   getLabel={cat => cat.name || ''}
   onChange={val => setFormData(fd => ({ ...fd, idCategory: val }))}
+  required
 />
 
 <PickerField
@@ -185,7 +310,7 @@ const styles = StyleSheet.create({
 
 ### 3.1. Queries (połączone dane)
 
-**Backend – ItemDto:**
+**Backend — ItemDto:**
 ```csharp
 public string? CategoryName { get; set; }
 public string? UnitName { get; set; }
@@ -211,26 +336,116 @@ public string? UnitName { get; set; }
 
 ---
 
-## CZĘŚĆ 4: Formularz produktu (40 minut)
+## CZĘŚĆ 4: Formularz produktu — pełna implementacja (40 minut)
 
-- Uzupełnienie pól: name, description, idCategory, price, quantity, idUnitOfMeasurement, code
-- Walidacja pól wymaganych
-- PickerField dla kategorii i jednostki
+### 4.1. Pobieranie danych słownikowych
+
+```tsx
+const [categories, setCategories] = useState<Category[]>([]);
+const [units, setUnits] = useState<UnitOfMeasurement[]>([]);
+const [loading, setLoading] = useState(true);
+
+useEffect(() => {
+  const loadData = async () => {
+    try {
+      const [cats, unts] = await Promise.all([
+        apiService.getCategories(),
+        apiService.getUnitOfMeasurements(),
+      ]);
+      setCategories(cats);
+      setUnits(unts);
+    } catch (error) {
+      Alert.alert('Błąd', 'Nie udało się załadować danych');
+    } finally {
+      setLoading(false);
+    }
+  };
+  loadData();
+}, []);
+```
+
+### 4.2. Walidacja formularza
+
+```tsx
+const handleSubmit = async () => {
+  // Walidacja
+  if (!name.trim()) {
+    Alert.alert('Błąd', 'Wpisz nazwę produktu');
+    return;
+  }
+  if (!idCategory) {
+    Alert.alert('Błąd', 'Wybierz kategorię');
+    return;
+  }
+
+  try {
+    setSubmitting(true);
+    await createItem({
+      name: name.trim(),
+      description: description.trim() || undefined,
+      price: price ? parseFloat(price) : undefined,
+      quantity: quantity ? parseFloat(quantity) : undefined,
+      idCategory: parseInt(idCategory),
+      idUnitOfMeasurement: idUnitOfMeasurement
+        ? parseInt(idUnitOfMeasurement)
+        : undefined,
+      code: code.trim() || undefined,
+    });
+
+    Alert.alert('Sukces', 'Produkt został utworzony', [
+      { text: 'OK', onPress: () => navigation.goBack() },
+    ]);
+  } catch (error) {
+    Alert.alert('Błąd', (error as Error).message);
+  } finally {
+    setSubmitting(false);
+  }
+};
+```
+
+### 4.3. Pola formularza
+
+| Pole | Typ | Wymagane | Uwagi |
+|------|-----|----------|-------|
+| name | TextInput | ✅ | Nazwa produktu |
+| description | TextInput (multiline) | ❌ | Opis |
+| price | TextInput (decimal-pad) | ❌ | Cena |
+| quantity | TextInput (decimal-pad) | ❌ | Ilość |
+| code | TextInput | ❌ | Kod produktu |
+| idCategory | Chip/Picker | ✅ | Kategoria |
+| idUnitOfMeasurement | Chip/Picker | ❌ | Jednostka miary |
 
 ---
 
 ## 📝 Zadania Praktyczne
 
-### Zadanie 1: CRUD dla klientów (Client) z pickerem relacyjnym
-### Zadanie 2: Przypisanie produktu do dostawcy (jeśli dodany)
-### Zadanie 3: Obsługa „Brak kategorii” / „Brak jednostki” jako null
+### Zadanie 1: CRUD dla klientów (Client) z selectorem relacyjnym
+Zaimplementuj ekrany tworzenia i edycji klienta z wyborem kategorii klienta (jeśli istnieje).
+
+### Zadanie 2: Refaktoryzacja do ChipSelector
+Wyodrębnij logikę Chip UI do reużywalnego komponentu `ChipSelector`:
+```tsx
+interface ChipSelectorProps<T> {
+  items: T[];
+  selectedValue: string;
+  onSelect: (value: string) => void;
+  getValue: (item: T) => string;
+  getLabel: (item: T) => string;
+  allowEmpty?: boolean;
+  emptyLabel?: string;
+  disabled?: boolean;
+}
+```
+
+### Zadanie 3: Obsługa „Brak kategorii" / „Brak jednostki" jako null
+Upewnij się, że opcjonalne pola (jak `idUnitOfMeasurement`) poprawnie obsługują wartość pustą i wysyłają `null` do API.
 
 ---
 
 ## ➡️ Następna Lekcja
 
-**[Lekcja 7: Zamówienia – Relacje M:M (Order, OrderItem)](./lekcja-07-zamowienia.md)**
+**[Lekcja 7: Zamówienia — Relacje M:M (Order, OrderItem)](./lekcja-07-zamowienia.md)**
 
 ---
 
-**Gratulacje! Teraz umiesz obsługiwać relacje 1:M!**
+**Gratulacje! Teraz umiesz obsługiwać relacje 1:M w React Native z CQRS!**
