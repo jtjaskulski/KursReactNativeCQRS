@@ -378,17 +378,17 @@ class ApiService {
   // ========== JEDNOSTKI MIARY ==========
 
   async getUnitOfMeasurements(): Promise<UnitOfMeasurement[]> {
-    return this.request<UnitOfMeasurement[]>('/UnitOfMeasurement');
+    return this.request<UnitOfMeasurement[]>('/UnitOfMeasurements');
   }
 
   async getUnitOfMeasurement(id: number): Promise<UnitOfMeasurement> {
-    return this.request<UnitOfMeasurement>(`/UnitOfMeasurement/${id}`);
+    return this.request<UnitOfMeasurement>(`/UnitOfMeasurements/${id}`);
   }
 
   async createUnitOfMeasurement(
     data: Omit<UnitOfMeasurement, 'idUnitOfMeasurement'>
   ): Promise<{ id: number }> {
-    return this.request<{ id: number }>('/UnitOfMeasurement', {
+    return this.request<{ id: number }>('/UnitOfMeasurements', {
       method: 'POST',
       body: JSON.stringify(data),
     });
@@ -398,14 +398,14 @@ class ApiService {
     id: number,
     data: Partial<UnitOfMeasurement>
   ): Promise<void> {
-    return this.request<void>(`/UnitOfMeasurement/${id}`, {
+    return this.request<void>(`/UnitOfMeasurements/${id}`, {
       method: 'PUT',
       body: JSON.stringify({ ...data, idUnitOfMeasurement: id }),
     });
   }
 
   async deleteUnitOfMeasurement(id: number): Promise<void> {
-    return this.request<void>(`/UnitOfMeasurement/${id}`, {
+    return this.request<void>(`/UnitOfMeasurements/${id}`, {
       method: 'DELETE',
     });
   }
@@ -413,13 +413,13 @@ class ApiService {
   // ========== KATEGORIE ==========
 
   async getCategories(): Promise<Category[]> {
-    return this.request<Category[]>('/Category');
+    return this.request<Category[]>('/Categories');
   }
 
   async createCategory(
     data: Omit<Category, 'idCategory'>
   ): Promise<{ id: number }> {
-    return this.request<{ id: number }>('/Category', {
+    return this.request<{ id: number }>('/Categories', {
       method: 'POST',
       body: JSON.stringify(data),
     });
@@ -429,14 +429,14 @@ class ApiService {
     id: number,
     data: Partial<Category>
   ): Promise<void> {
-    return this.request<void>(`/Category/${id}`, {
+    return this.request<void>(`/Categories/${id}`, {
       method: 'PUT',
       body: JSON.stringify({ ...data, idCategory: id }),
     });
   }
 
   async deleteCategory(id: number): Promise<void> {
-    return this.request<void>(`/Category/${id}`, {
+    return this.request<void>(`/Categories/${id}`, {
       method: 'DELETE',
     });
   }
@@ -554,25 +554,10 @@ export function ItemsProvider({ children }: { children: ReactNode }) {
   const createItem = async (data: CreateItemRequest) => {
     try {
       setError(null);
-      const result = await apiService.createItem(data);
+      await apiService.createItem(data);
       
-      // Dodaj nowy item do listy (lokalnie bez refresh)
-      // Mapujemy pola z CreateItemRequest na pełny Item, ustawiając
-      // wartości domyślne (null/empty) tam gdzie request ma pola opcjonalne.
-      const newItem: Item = {
-        idItem: result.id,
-        name: data.name,
-        description: data.description ?? null,
-        idCategory: data.idCategory,
-        categoryName: '',
-        price: data.price ?? null,
-        quantity: data.quantity ?? null,
-        idUnitOfMeasurement: data.idUnitOfMeasurement ?? null,
-        unitName: '',
-        code: data.code ?? null,
-        isActive: true,
-      };
-      setItems(prev => [...prev, newItem]);
+      // Odśwież listę z API aby pobrać pełne dane (categoryName, unitName)
+      await refreshItems();
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Unknown error';
       setError(message);
@@ -586,14 +571,8 @@ export function ItemsProvider({ children }: { children: ReactNode }) {
       setError(null);
       await apiService.updateItem(id, data);
       
-      // Zaktualizuj lokalnie
-      setItems(prev =>
-        prev.map(item =>
-          item.idItem === id
-            ? { ...item, ...data }
-            : item
-        )
-      );
+      // Odśwież listę z API aby pobrać pełne dane (categoryName, unitName)
+      await refreshItems();
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Unknown error';
       setError(message);
@@ -957,6 +936,7 @@ import {
   ScrollView,
   Text,
   ActivityIndicator,
+  TouchableOpacity,
 } from 'react-native';
 import { useState, useEffect } from 'react';
 import { useItems } from '../context/ItemsContext';
@@ -1100,43 +1080,76 @@ function CreateItemScreen({ navigation }: Props) {
           editable={!submitting}
         />
 
+        {/* Kategoria - używamy TouchableOpacity zamiast Button dla lepszej obsługi na Androidzie */}
         <Text style={styles.label}>Kategoria *</Text>
         <View style={styles.pickerContainer}>
-          {categories.map(cat => (
-            <Button
-              key={cat.idCategory}
-              title={cat.name || 'Brak'}
-              onPress={() => setIdCategory(cat.idCategory.toString())}
-              color={
-                idCategory === cat.idCategory.toString()
-                  ? '#007AFF'
-                  : '#999'
-              }
-            />
-          ))}
+          {categories.map(cat => {
+            const isSelected = idCategory === cat.idCategory.toString();
+            return (
+              <TouchableOpacity
+                key={cat.idCategory}
+                style={[
+                  styles.chip,
+                  isSelected && styles.chipSelected,
+                ]}
+                onPress={() => setIdCategory(cat.idCategory.toString())}
+                disabled={submitting}
+                activeOpacity={0.7}
+              >
+                <Text style={[
+                  styles.chipText,
+                  isSelected && styles.chipTextSelected,
+                ]}>
+                  {cat.name || 'Brak'}
+                </Text>
+              </TouchableOpacity>
+            );
+          })}
         </View>
 
+        {/* Jednostka miary */}
         <Text style={styles.label}>Jednostka miary</Text>
         <View style={styles.pickerContainer}>
-          <Button
-            title="Brak"
+          <TouchableOpacity
+            style={[
+              styles.chip,
+              idUnitOfMeasurement === '' && styles.chipSelected,
+            ]}
             onPress={() => setIdUnitOfMeasurement('')}
-            color={idUnitOfMeasurement === '' ? '#007AFF' : '#999'}
-          />
-          {units.map(unit => (
-            <Button
-              key={unit.idUnitOfMeasurement}
-              title={unit.name || 'Brak'}
-              onPress={() =>
-                setIdUnitOfMeasurement(unit.idUnitOfMeasurement.toString())
-              }
-              color={
-                idUnitOfMeasurement === unit.idUnitOfMeasurement.toString()
-                  ? '#007AFF'
-                  : '#999'
-              }
-            />
-          ))}
+            disabled={submitting}
+            activeOpacity={0.7}
+          >
+            <Text style={[
+              styles.chipText,
+              idUnitOfMeasurement === '' && styles.chipTextSelected,
+            ]}>
+              Brak
+            </Text>
+          </TouchableOpacity>
+          {units.map(unit => {
+            const isSelected = idUnitOfMeasurement === unit.idUnitOfMeasurement.toString();
+            return (
+              <TouchableOpacity
+                key={unit.idUnitOfMeasurement}
+                style={[
+                  styles.chip,
+                  isSelected && styles.chipSelected,
+                ]}
+                onPress={() =>
+                  setIdUnitOfMeasurement(unit.idUnitOfMeasurement.toString())
+                }
+                disabled={submitting}
+                activeOpacity={0.7}
+              >
+                <Text style={[
+                  styles.chipText,
+                  isSelected && styles.chipTextSelected,
+                ]}>
+                  {unit.name || 'Brak'}
+                </Text>
+              </TouchableOpacity>
+            );
+          })}
         </View>
 
         <View style={styles.buttons}>
@@ -1192,12 +1205,33 @@ const styles = StyleSheet.create({
   pickerContainer: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    columnGap: 8,  // gap wspierany od RN 0.71+
+    gap: 8,
     marginBottom: 8,
+  },
+  // Style dla chipów (kategoria/jednostka)
+  chip: {
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    borderRadius: 8,
+    backgroundColor: '#e0e0e0',
+    borderWidth: 2,
+    borderColor: '#e0e0e0',
+  },
+  chipSelected: {
+    backgroundColor: '#007AFF',
+    borderColor: '#007AFF',
+  },
+  chipText: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#333',
+  },
+  chipTextSelected: {
+    color: '#fff',
   },
   buttons: {
     flexDirection: 'row',
-    columnGap: 10,  // gap wspierany od RN 0.71+
+    columnGap: 10,
     marginTop: 20,
     marginBottom: 30,
   },
@@ -1205,6 +1239,352 @@ const styles = StyleSheet.create({
 
 export default CreateItemScreen;
 ```
+
+---
+
+## CZĘŚĆ 7.2: Formularz Edycji Produktu
+
+### src/screens/EditItemScreen.tsx
+
+```typescript
+import {
+  View,
+  TextInput,
+  Button,
+  StyleSheet,
+  Alert,
+  ScrollView,
+  Text,
+  ActivityIndicator,
+  Switch,
+  TouchableOpacity,
+} from 'react-native';
+import { useState, useEffect } from 'react';
+import { useItems } from '../context/ItemsContext';
+import apiService from '../api/apiService';
+import type { Category, UnitOfMeasurement } from '../types/models';
+
+import { NativeStackScreenProps } from '@react-navigation/native-stack';
+import { RootStackParamList } from '../navigation/types';
+
+type Props = NativeStackScreenProps<RootStackParamList, 'EditItem'>;
+
+function EditItemScreen({ navigation, route }: Props) {
+  const { item } = route.params;
+  const { updateItem } = useItems();
+
+  // Form state - inicjalizacja z przekazanego itemu
+  const [name, setName] = useState(item.name || '');
+  const [description, setDescription] = useState(item.description || '');
+  const [price, setPrice] = useState(item.price?.toString() || '');
+  const [quantity, setQuantity] = useState(item.quantity?.toString() || '');
+  const [code, setCode] = useState(item.code || '');
+  const [idCategory, setIdCategory] = useState(item.idCategory.toString());
+  const [idUnitOfMeasurement, setIdUnitOfMeasurement] = useState(
+    item.idUnitOfMeasurement?.toString() || ''
+  );
+  const [isActive, setIsActive] = useState(item.isActive);
+
+  // Dropdowns state
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [units, setUnits] = useState<UnitOfMeasurement[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [submitting, setSubmitting] = useState(false);
+
+  // Pobranie kategorii i jednostek
+  useEffect(() => {
+    const loadData = async () => {
+      try {
+        const [cats, unts] = await Promise.all([
+          apiService.getCategories(),
+          apiService.getUnitOfMeasurements(),
+        ]);
+        setCategories(cats);
+        setUnits(unts);
+      } catch (error) {
+        Alert.alert('Błąd', 'Nie udało się załadować danych');
+      } finally {
+        setLoading(false);
+      }
+    };
+    loadData();
+  }, []);
+
+  const handleSubmit = async () => {
+    // Walidacja
+    if (!name.trim()) {
+      Alert.alert('Błąd', 'Wpisz nazwę produktu');
+      return;
+    }
+    if (!idCategory) {
+      Alert.alert('Błąd', 'Wybierz kategorię');
+      return;
+    }
+
+    try {
+      setSubmitting(true);
+      await updateItem(item.idItem, {
+        idItem: item.idItem,
+        name: name.trim(),
+        description: description.trim() || undefined,
+        price: price ? parseFloat(price) : undefined,
+        quantity: quantity ? parseFloat(quantity) : undefined,
+        idCategory: parseInt(idCategory),
+        idUnitOfMeasurement: idUnitOfMeasurement
+          ? parseInt(idUnitOfMeasurement)
+          : undefined,
+        code: code.trim() || undefined,
+        isActive,
+      });
+
+      Alert.alert('Sukces', 'Produkt został zaktualizowany', [
+        { text: 'OK', onPress: () => navigation.goBack() },
+      ]);
+    } catch (error) {
+      Alert.alert('Błąd', (error as Error).message);
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  if (loading) {
+    return (
+      <View style={styles.centerContainer}>
+        <ActivityIndicator size="large" />
+      </View>
+    );
+  }
+
+  return (
+    <ScrollView style={styles.container}>
+      <View style={styles.form}>
+        <Text style={styles.label}>Nazwa produktu *</Text>
+        <TextInput
+          style={styles.input}
+          placeholder="Wpisz nazwę"
+          value={name}
+          onChangeText={setName}
+          editable={!submitting}
+        />
+
+        <Text style={styles.label}>Opis</Text>
+        <TextInput
+          style={[styles.input, styles.multiline]}
+          placeholder="Wpisz opis"
+          value={description}
+          onChangeText={setDescription}
+          multiline
+          numberOfLines={3}
+          editable={!submitting}
+        />
+
+        <Text style={styles.label}>Cena</Text>
+        <TextInput
+          style={styles.input}
+          placeholder="Wpisz cenę"
+          value={price}
+          onChangeText={setPrice}
+          keyboardType="decimal-pad"
+          editable={!submitting}
+        />
+
+        <Text style={styles.label}>Ilość</Text>
+        <TextInput
+          style={styles.input}
+          placeholder="Wpisz ilość"
+          value={quantity}
+          onChangeText={setQuantity}
+          keyboardType="decimal-pad"
+          editable={!submitting}
+        />
+
+        <Text style={styles.label}>Kod produktu</Text>
+        <TextInput
+          style={styles.input}
+          placeholder="Wpisz kod"
+          value={code}
+          onChangeText={setCode}
+          editable={!submitting}
+        />
+
+        <Text style={styles.label}>Kategoria *</Text>
+        <View style={styles.pickerContainer}>
+          {categories.map(cat => {
+            const isSelected = idCategory === cat.idCategory.toString();
+            return (
+              <TouchableOpacity
+                key={cat.idCategory}
+                style={[
+                  styles.chip,
+                  isSelected && styles.chipSelected,
+                ]}
+                onPress={() => setIdCategory(cat.idCategory.toString())}
+                disabled={submitting}
+                activeOpacity={0.7}
+              >
+                <Text style={[
+                  styles.chipText,
+                  isSelected && styles.chipTextSelected,
+                ]}>
+                  {cat.name || 'Brak'}
+                </Text>
+              </TouchableOpacity>
+            );
+          })}
+        </View>
+
+        <Text style={styles.label}>Jednostka miary</Text>
+        <View style={styles.pickerContainer}>
+          <TouchableOpacity
+            style={[
+              styles.chip,
+              idUnitOfMeasurement === '' && styles.chipSelected,
+            ]}
+            onPress={() => setIdUnitOfMeasurement('')}
+            disabled={submitting}
+            activeOpacity={0.7}
+          >
+            <Text style={[
+              styles.chipText,
+              idUnitOfMeasurement === '' && styles.chipTextSelected,
+            ]}>
+              Brak
+            </Text>
+          </TouchableOpacity>
+          {units.map(unit => {
+            const isSelected = idUnitOfMeasurement === unit.idUnitOfMeasurement.toString();
+            return (
+              <TouchableOpacity
+                key={unit.idUnitOfMeasurement}
+                style={[
+                  styles.chip,
+                  isSelected && styles.chipSelected,
+                ]}
+                onPress={() =>
+                  setIdUnitOfMeasurement(unit.idUnitOfMeasurement.toString())
+                }
+                disabled={submitting}
+                activeOpacity={0.7}
+              >
+                <Text style={[
+                  styles.chipText,
+                  isSelected && styles.chipTextSelected,
+                ]}>
+                  {unit.name || 'Brak'}
+                </Text>
+              </TouchableOpacity>
+            );
+          })}
+        </View>
+
+        <View style={styles.switchRow}>
+          <Text style={styles.label}>Aktywny</Text>
+          <Switch
+            value={isActive}
+            onValueChange={setIsActive}
+            disabled={submitting}
+          />
+        </View>
+
+        <View style={styles.buttons}>
+          <Button
+            title="Anuluj"
+            onPress={() => navigation.goBack()}
+            color="#999"
+            disabled={submitting}
+          />
+          <Button
+            title={submitting ? 'Zapisywanie...' : 'Zapisz'}
+            onPress={handleSubmit}
+            disabled={submitting}
+          />
+        </View>
+      </View>
+    </ScrollView>
+  );
+}
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: '#f5f5f5',
+  },
+  centerContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  form: {
+    padding: 16,
+  },
+  label: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#333',
+    marginBottom: 8,
+    marginTop: 16,
+  },
+  input: {
+    borderWidth: 1,
+    borderColor: '#ddd',
+    borderRadius: 8,
+    padding: 12,
+    fontSize: 16,
+    backgroundColor: '#fff',
+  },
+  multiline: {
+    height: 80,
+    textAlignVertical: 'top',
+  },
+  pickerContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
+    marginBottom: 8,
+  },
+  chip: {
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    borderRadius: 8,
+    backgroundColor: '#e0e0e0',
+    borderWidth: 2,
+    borderColor: '#e0e0e0',
+  },
+  chipSelected: {
+    backgroundColor: '#007AFF',
+    borderColor: '#007AFF',
+  },
+  chipText: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#333',
+  },
+  chipTextSelected: {
+    color: '#fff',
+  },
+  switchRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginTop: 16,
+    marginBottom: 8,
+  },
+  buttons: {
+    flexDirection: 'row',
+    columnGap: 10,
+    marginTop: 20,
+    marginBottom: 30,
+  },
+});
+
+export default EditItemScreen;
+```
+
+**Różnice względem CreateItemScreen:**
+- Pobiera `item` z `route.params` i inicjalizuje formularz wartościami
+- Dodatkowe pole `isActive` (Switch) - wymagane przez `UpdateItemRequest`
+- Wywołuje `updateItem()` zamiast `createItem()`
+- Zmienione komunikaty ("Zapisz" zamiast "Utwórz")
 
 ---
 
@@ -1266,7 +1646,7 @@ export default RootNavigator;
    dotnet new webapi -n SolutionOrdersReact.Server
    dotnet add package MediatR
    dotnet add package EntityFrameworkCore.SqlServer
-   # Utwórz API endpoints dla /Items, /Category, /UnitOfMeasurement
+   # Utwórz API endpoints dla /Items, /Categories, /UnitOfMeasurements
    ```
 
 2. ✅ **React Native projekt:**
@@ -1336,17 +1716,17 @@ export default RootNavigator;
 ### Zadanie 1: Kategorie CRUD
 Powtórz ten sam pattern dla Categories (context, screens, navigation).
 
-### Zadanie 2: Edit Screen
-Utwórz `EditItemScreen.tsx` - pobierz item z `route.params`, pozwól edit, wyślij PUT.
-
-### Zadanie 3: Wyszukiwanie
+### Zadanie 2: Wyszukiwanie
 Dodaj search bar do `ItemsScreen.tsx` - filtruj Items po nazwie.
 
-### Zadanie 4: Pull to Refresh
+### Zadanie 3: Pull to Refresh
 Dodaj `RefreshControl` do FlatList w ItemsScreen.
 
-### Zadanie 5: Error Handling
+### Zadanie 4: Error Handling
 Dodaj retry logic jeśli API jest offline.
+
+### Zadanie 5: Jednostki miary CRUD
+Utwórz ekrany do zarządzania jednostkami miary (UnitOfMeasurements).
 
 ---
 
@@ -1368,6 +1748,26 @@ pnpm react-native log-android
 ```typescript
 // Zawsze test czy provider wraps ekran
 console.log('Items Context:', useItems());
+```
+
+**Dlaczego TouchableOpacity zamiast Button?**
+
+Komponent `Button` w React Native ma ograniczenia na Androidzie:
+- Słaba obsługa dotyku w layoutach `flexWrap`
+- Ograniczone możliwości stylowania (tylko `color` prop)
+- Problemy z klikaniem na niektórych urządzeniach (np. Pixel 7)
+
+`TouchableOpacity` daje pełną kontrolę nad wyglądem i działa niezawodnie:
+```tsx
+<TouchableOpacity
+  style={[styles.chip, isSelected && styles.chipSelected]}
+  onPress={() => setValue(id)}
+  activeOpacity={0.7}  // feedback wizualny przy kliknięciu
+>
+  <Text style={[styles.chipText, isSelected && styles.chipTextSelected]}>
+    {label}
+  </Text>
+</TouchableOpacity>
 ```
 
 ---
