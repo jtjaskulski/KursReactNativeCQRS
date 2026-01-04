@@ -98,4 +98,3 @@ namespace SolutionOrdersReact.Server.Models
         public virtual ICollection<OrderItem> OrderItems { get; set; } = new List<OrderItem>();
     }
 }
-

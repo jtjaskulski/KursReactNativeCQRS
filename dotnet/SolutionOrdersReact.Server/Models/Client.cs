@@ -87,4 +87,3 @@ namespace SolutionOrdersReact.Server.Models
         public string FullName => $"{FirstName} {LastName}";
     }
 }
-
